@@ -5,10 +5,10 @@ import os
 from urllib import request
 from getpass import getpass
 from bs4 import BeautifulSoup
+import sys
 
-
-user_= input("User: ")
-password_= getpass("Password: ")
+user_= sys.argv[1]
+password_= sys.argv[2]
 
 convert = base64.b64encode(f'{user_}:{password_}'.encode()).decode('ascii')
 
