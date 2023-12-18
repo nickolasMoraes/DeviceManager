@@ -63,6 +63,9 @@ def get_fastboot_info():
     radio = input_tail(call_command("fastboot getvar radio"))
     carrier = input_tail(call_command("fastboot getvar ro.carrier"))
 
+    device_info = []
+    device_info.append(barcode, hw_type, sku, hw_rev, version, cid, channelid, radio, carrier)
+
     texto = f'''
     DEVICE INFORMATIONS:
     Barcode: {barcode}
@@ -76,6 +79,7 @@ def get_fastboot_info():
     Carrier: {carrier}'''
     
     texto_resultado["text"] = texto
+    return device_info
 
 def fastboot_erases():
     call_command("fastboot erase frp")
