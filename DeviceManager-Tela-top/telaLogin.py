@@ -3,7 +3,7 @@ import os
 import requests
 import base64
 
-winLog = CTk()
+winLog = CTk(fg_color="gray")
 winLog.geometry("1000x600")
 winLog.title("MDM - Login")
 winLog.resizable(False, False)
@@ -11,7 +11,7 @@ winLog.resizable(False, False)
 frameLog = CTkFrame(winLog, width=500, height=600, fg_color="black")
 frameWel = CTkFrame(frameLog, width=290, height=300, fg_color="black")
 
-wc = CTkLabel(frameWel, text="Welcome", font=("Roboto", 25))
+wc = CTkLabel(frameWel, text="Welcome", text_color="white", font=("Roboto", 25))
 wc.place(x=95, y=50)
 
 user_ = CTkEntry(frameWel, placeholder_text="CoreID", width=250)
