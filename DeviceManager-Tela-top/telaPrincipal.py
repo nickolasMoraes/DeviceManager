@@ -2,7 +2,8 @@ from customtkinter import *
 import os
 import subprocess
 
-adb_path = f'"{os.path.dirname(__file__)}\\platform-tools\\fastboot.exe" '
+adb_path = f'"{os.path.dirname(__file__)}\\platform-tools\\adb.exe" '
+fastboot_path = f'"{os.path.dirname(__file__)}\\platform-tools\\fastboot.exe" '
 
 class Scripts_Tela(CTkFrame):
     class DeviceButton(CTkButton):
@@ -68,17 +69,31 @@ class Scripts_Tela(CTkFrame):
             self.deviceList_buttons[0].destroy()
             self.deviceList_buttons.pop(0)
 
-        output = subprocess.getoutput(adb_path + "devices") 
-        _serialNumber = output.split("\n")
-        print(_serialNumber)
+        output = subprocess.getoutput(adb_path + "devices")
+        _output = subprocess.getoutput(fastboot_path + "devices")
+        serialADB = output.split("\n")
+        serialFast = _output.split("\n")
+        print(serialADB)
+        print(serialFast)
 
         serialNumber = []
-        for item in _serialNumber:
+        serial_Number2 = []
+        for item in serialADB:
             if item.find("List of") == -1 and item != "" and item.find("daemon") == -1:
                 if item.find("unauthorized") == -1:
                     serialNumber.append(item.strip("\tdevice"))
 
+        for item in serialFast:
+            if item.find("List of") == -1 and item != "" and item.find("daemon") == -1:
+                if item.find("unauthorized") == -1:
+                    serial_Number2.append(item.strip("\tdevice"))
+                    
+
         for device in serialNumber:
+            self.deviceList_buttons.append(Scripts_Tela.DeviceButton(self.deviceList, device))
+
+
+        for device in serial_Number2:
             self.deviceList_buttons.append(Scripts_Tela.DeviceButton(self.deviceList, device))
 
         for device in self.deviceList_buttons:

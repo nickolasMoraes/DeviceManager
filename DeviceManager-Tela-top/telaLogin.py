@@ -2,6 +2,7 @@ from customtkinter import *
 import os
 import requests
 import base64
+telaPrincipal = f'"{os.path.dirname(__file__)}\\DeviceManager-Tela-top\\telaPrincipal.py" '
 
 winLog = CTk(fg_color="gray")
 winLog.geometry("1000x600")
@@ -21,7 +22,7 @@ password_ = CTkEntry(frameWel, placeholder_text="Password", show="*", width=250)
 password_.place(x=20, y=150)
 
 def click():
-        os.system(f'start \"DM\" cmd /c py multi.py {user_.get()} {password_.get()}')
+        os.system(f'start \"\\DeviceManager-Tela-top\\" cmd /c py telaPrincipal.py {user_.get()} {password_.get()}')
         quit()
 
 button = CTkButton(frameWel, text="Login", command=click)
