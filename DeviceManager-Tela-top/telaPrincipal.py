@@ -2,12 +2,12 @@ from customtkinter import *
 import os
 import subprocess
 
-adb_path = f'{os.path.dirname(__file__)}\\platform-tools\\adb.exe '
+adb_path = f'"{os.path.dirname(__file__)}\\platform-tools\\fastboot.exe" '
 
 class Scripts_Tela(CTkFrame):
     class DeviceButton(CTkButton):
         def __init__(self, master, label):
-            super() .__init__(master, width=270, height=50, fg_color="gray", text=label, command=self.click_device)
+            super() .__init__(master, width=270, height=100, fg_color="gray", text=label, command=self.click_device)
             self.isChecked = False
         
         def click_device(self):
@@ -19,11 +19,11 @@ class Scripts_Tela(CTkFrame):
                 self.isChecked = False
 
     def __init__(self, master): 
-        super().__init__(master, width=850, height=600, fg_color="pink", bg_color="pink")
+        super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         #widgets 
-        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="purple", bg_color="gray")
-        self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="green", bg_color="green")
-        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450)
+        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
+        self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList_buttons = []
         
         #Botão refresh
@@ -70,12 +70,13 @@ class Scripts_Tela(CTkFrame):
 
         output = subprocess.getoutput(adb_path + "devices") 
         _serialNumber = output.split("\n")
+        print(_serialNumber)
 
         serialNumber = []
-        for iten in _serialNumber:
-            if iten.find("List of") == -1 and iten != "":
-                if iten.find("unauthorized") == -1:
-                    serialNumber.append(iten.strip("\tdevice"))
+        for item in _serialNumber:
+            if item.find("List of") == -1 and item != "" and item.find("daemon") == -1:
+                if item.find("unauthorized") == -1:
+                    serialNumber.append(item.strip("\tdevice"))
 
         for device in serialNumber:
             self.deviceList_buttons.append(Scripts_Tela.DeviceButton(self.deviceList, device))
@@ -125,9 +126,9 @@ def show_scripts():
     scripts_tela.place(x=150) 
 
 #Frames Principais
-menuLateral = CTkFrame(base, width=150, height=600, fg_color="#1D5DEC", bg_color="#1D5DEC").place(x=0) 
-multflash = CTkButton(menuLateral, text="MultiFlash", width=150, height=80, fg_color="#1D5DEC", bg_color="#1D5DEC", command=show_multF).place(x=0) 
-Scripts = CTkButton(menuLateral, text="Tools", width=150, height=80, fg_color="#1D5DEC", bg_color="#1D5DEC", command=show_scripts).place(x=0, y=80) 
+menuLateral = CTkFrame(base, width=150, height=600, fg_color="#191970", bg_color="#191970").place(x=0) 
+multflash = CTkButton(menuLateral, text="MultiFlash", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_multF).place(x=0) 
+Scripts = CTkButton(menuLateral, text="Tools", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_scripts).place(x=0, y=80) 
 multF_tela.place(x=150) 
 
 
