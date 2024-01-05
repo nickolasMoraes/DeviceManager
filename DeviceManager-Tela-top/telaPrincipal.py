@@ -87,12 +87,12 @@ Carrier: {self.carrier}
         #Botões tools Bar
 
         self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=set_carrier)
-        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU")
+        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=change_sku)
         self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM")
         self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM")
         self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO")
-        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump")
-        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump")
+        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=setup_jump)
+        
         self.erase = CTkButton(self.tools_bar, width=150, text="Erase")
     
     def place(self, **kwargs): 
