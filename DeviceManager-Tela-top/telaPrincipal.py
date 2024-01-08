@@ -86,12 +86,12 @@ Carrier: {self.carrier}
 
         #Botões tools Bar
 
-        self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=set_carrier)
+        self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:set_carrier(self.getcheckedDevice()))
         self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=change_sku)
-        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM")
+        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=sim_type)
         self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM")
         self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO")
-        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=setup_jump)
+        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: setup_jump(self.getcheckedDevice()))
         
         self.erase = CTkButton(self.tools_bar, width=150, text="Erase")
     
@@ -145,7 +145,7 @@ Carrier: {self.carrier}
                     if secure.find("0") != -1:
                         adbDevice.append("No")
                     elif secure.find("1") != -1:
-                         adbDevice.append("Yes")
+                        adbDevice.append("Yes")
                 
                 sku = subprocess.getoutput(adb_path + f"-s {adbDevice[1]} shell getprop ro.boot.hardware.sku")
                 adbDevice.append(sku)
@@ -183,9 +183,9 @@ Carrier: {self.carrier}
                 fastDevice.append(carrier[12:carrier.find("\n")])
 
                 fastList.append(fastDevice)
+                print(fastList)
 
         for device in adbList:
-            self.deviceList_buttons.append(Scripts_Tela.DeviceButton(self.deviceList, device))
             self.deviceList_buttons.append(Scripts_Tela.DeviceButton(self.deviceList, device))
 
         for device in fastList:
@@ -196,21 +196,14 @@ Carrier: {self.carrier}
         
         for device in self.statusFrame:
             device.pack()
-
+  
     def getcheckedDevice(self):
         checkedDevices = []
         for device in self.deviceList_buttons:
             if device.isChecked:
-                checkedDevices.append(device)
+                checkedDevices.append(device.barcode)
         return(checkedDevices)
-    
-    def getcheckedDevice2(self):
-        checkedDevices = []
-        for device in self.statusFrame:
-            if device.isChecked:
-                checkedDevices.append(device)
-        return(checkedDevices)
-
+        
 class MultF_Tela(CTkFrame): 
     def __init__(self, master): 
         super().__init__(master, width=850, height=600, fg_color="gray", bg_color="gray") 
@@ -222,6 +215,9 @@ class MultF_Tela(CTkFrame):
         for widget in self.place_slaves(): 
             widget.place_forget() 
             return super().place_forget() 
+
+#Funções gerais
+
         
 base = CTk() 
 base.geometry("1000x600") 
