@@ -87,13 +87,13 @@ Carrier: {self.carrier}
         #Botões tools Bar
 
         self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:set_carrier(self.getcheckedDevice()))
-        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=change_sku)
-        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=sim_type)
-        self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM")
-        self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO")
+        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=lambda:change_sku(self.getcheckedDevice()))
+        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=lambda:sim_type(self.getcheckedDevice()))
+        self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM", command=lambda:sim_type2(self.getcheckedDevice()))
+        self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO", command=lambda:change_radio(self.getcheckedDevice()))
         self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: setup_jump(self.getcheckedDevice()))
-        
-        self.erase = CTkButton(self.tools_bar, width=150, text="Erase")
+        self.erase = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:erase_mult(self.getcheckedDevice()))
+        self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:fast_mode(self.getcheckedDevice()))
     
     def place(self, **kwargs): 
         self.tools_bar.place(y=0)
@@ -108,6 +108,7 @@ Carrier: {self.carrier}
         self.refreshButton.place(y=10, x=100)
         self.deviceList.place(y=50)
         self.infoList.place(y=500)
+        self.fastboot_mode.place(y=60, x=520)
         
 
         return super().place(**kwargs) 
@@ -137,7 +138,7 @@ Carrier: {self.carrier}
             if item.find("List of") == -1 and item != "" and item.find("daemon") == -1 and item.find("unauthorized") == -1:
                 adbDevice = []
                 adbDevice.append("ADB")
-                adbDevice.append(item.strip("\tdevice"))
+                adbDevice.append(item.strip("device").strip("\\t"))
                 secure = subprocess.getoutput(adb_path + f"-s {adbDevice[1]} shell getprop ro.boot.secure_hardware") # Verifica se o device é seguro/ monta a lista com a infos de un unico device
                 if secure.find("no devices") != -1:
                     return
@@ -162,7 +163,7 @@ Carrier: {self.carrier}
             if item != "":
                 fastDevice = []
                 fastDevice.append("FAST")
-                fastDevice.append(item.strip("\tfastboot"))
+                fastDevice.append(item.strip("fastboot").strip("\t"))
                 secure = subprocess.getoutput(fastboot_path + f"getvar secure -s {fastDevice[1]}") # Verifica se o device é seguro/ monta a lista com a infos de un unico device
                 
                 if secure.find("no devices") != -1:

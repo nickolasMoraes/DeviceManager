@@ -4,7 +4,7 @@ import requests
 import base64
 from tkinter import *
 from PIL import Image
-telaPrincipal = f'"{os.path.dirname(__file__)}\\DeviceManager-Tela-top\\telaPrincipal.py" '
+telaPrincipal = f'"{os.path.dirname(__file__)}\\DeviceManager-Tela-top\\telaPrincipal.py"'
 
 Imagens = os.path.dirname(os.path.realpath(__file__))
 img_log = CTkImage(Image.open(Imagens + "/login.png"), size=(500, 600))
@@ -31,7 +31,7 @@ password_ = CTkEntry(frameWel, placeholder_text="Password", show="*", width=250)
 password_.place(x=20, y=150)
 
 def click():
-        os.system(telaPrincipal f'{user_.get()} {password_.get()}')
+        os.system(f'start \"DM\" cmd /c py "{os.path.dirname(__file__)}\\telaPrincipal.py"')
         quit()
 
 button = CTkButton(frameWel, text="Login", command=click)
