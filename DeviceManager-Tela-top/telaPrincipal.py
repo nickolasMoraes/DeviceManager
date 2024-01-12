@@ -204,6 +204,8 @@ class MultF_Tela(CTkFrame):
         while len(self.deviceList_buttons_mf) > 0:
             self.deviceList_buttons_mf[0].destroy()
             self.deviceList_buttons_mf.pop(0)
+        self.updateProductLabel("")
+        self.checkedDevices = 0
 
         output = subprocess.getoutput(adb_path + "devices") # Barcode do Device em ADB
         serialADB = output.split("\n")
