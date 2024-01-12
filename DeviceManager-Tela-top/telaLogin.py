@@ -32,6 +32,7 @@ password_.place(x=20, y=150)
 
 def click():
         os.system(f'start \"DM\" cmd /c py "{os.path.dirname(__file__)}\\telaPrincipal.py"')
+        print(password_.get())
         quit()
 
 button = CTkButton(frameWel, text="Login", command=click)
