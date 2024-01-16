@@ -5,9 +5,12 @@ from toolsBar_Bottons import *
 import base64
 from bs4 import BeautifulSoup
 import requests
+import sys
 
 adb_path = f'"{os.path.dirname(__file__)}\\platform-tools\\adb.exe" '
 fastboot_path = f'"{os.path.dirname(__file__)}\\platform-tools\\fastboot.exe" '
+user = sys.argv[1]
+password = sys.argv[2]
 
 
 class Scripts_Tela(CTkFrame):
@@ -164,6 +167,9 @@ class MultF_Tela(CTkFrame):
         self.deviceList_buttons_mf = []
         self.commonProduct = ""
         self.checkedDevices = 0
+        self.url = "https://artifacts.mot.com/artifactory/"
+        self.productId_url = ""
+
 
         #Botão refresh
         self.refreshButton = CTkButton(self.deviceStatus, width=30, text="Refresh Devices", command=self.refresh_device)
@@ -172,27 +178,69 @@ class MultF_Tela(CTkFrame):
         self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white")
         self.fastbootName =  CTkLabel(self.tools_bar, width=200, fg_color="white")
 
+        
+
         #Combobox
+        self.androidVer_url = ""
+        def androidV_callback(value):
+            if self.androidVer_url == "":
+                self.url = f'{self.url}{value}'
+            else:
+                self.url = f'{self.productId_url}{value}'
+            self.androidVer_url = self.url
+            print(self.url)
+            self.updateBuildId(self.return_url_list())
+        self.androidVer_ = CTkComboBox(self.tools_bar, width=150, values=[], command=androidV_callback)#, text="Android Version", command=lambda:change_sku(self.getcheckedDevice()))
+        
 
-        self.androidVer = CTkComboBox(self.tools_bar, width=150, values=[])#, text="Android Version", command=lambda:change_sku(self.getcheckedDevice()))
-        self.androidVer.set("Version")
+        self.buildId_url = ""
+        def buildId_callback(value):
+            if self.buildId_url == "":
+                self.url = f'{self.url}{value}'
+            else:
+                self.url = f'{self.androidVer_url}{value}'
+            self.buildId_url = self.url
+            self.updateProductName(self.return_url_list())
+        self.buildId = CTkComboBox(self.tools_bar, width=150, command= buildId_callback)#, text="Build ID", command=lambda:sim_type(self.getcheckedDevice()))
+        
 
-        self.buildId = CTkComboBox(self.tools_bar, width=150)#, text="Build ID", command=lambda:sim_type(self.getcheckedDevice()))
-        self.buildId.set("Build")
+        self.productName_url = ""
+        def productName_callback(value):
+            if self.productName_url == "":
+                self.url = f'{self.url}{value}'
+            else:
+                self.url = f'{self.buildId_url}{value}'
+            self.productName_url = self.url
+            print(self.url)
+            self.updateuserType(self.return_url_list())
+        self.productName = CTkComboBox(self.tools_bar, width=150, command= productName_callback)#, text="Product Name", command=lambda:sim_type2(self.getcheckedDevice()))
+        
 
-        self.productName = CTkComboBox(self.tools_bar, width=150)#, text="Product Name", command=lambda:sim_type2(self.getcheckedDevice()))
-        self.productName.set("Product Name")
+        self.userType_url = ""
+        def userType_callback(value):
+            if self.userType_url == "":
+                self.url = f'{self.url}{value}'
+            else:
+                self.url = f'{self.productName_url}{value}'
+            self.userType_url = self.url
+            print(self.url)
+            self.updateCid(self.return_url_list())
 
-        self.userType = CTkComboBox(self.tools_bar, width=150)#, text="User Type", command=lambda:change_radio(self.getcheckedDevice()))
-        self.userType.set("User Type")
+        self.userType = CTkComboBox(self.tools_bar, width=150, command= userType_callback)#, text="User Type", command=lambda:change_radio(self.getcheckedDevice()))
 
-        self.cidType = CTkComboBox(self.tools_bar, width=150)#, text="CID Type", command=lambda: setup_jump(self.getcheckedDevice()))
-        self.cidType.set("Cid")
+        self.cidType_url = ""
+        def cidType_callback(value):
+            if self.cidType_url == "":
+                self.url = f'{self.url}{value}'
+            else:
+                self.url = f'{self.userType_url}{value}'
+            self.cidType_url = self.url
+
+        self.cidType = CTkComboBox(self.tools_bar, width=150, command= cidType_callback)#, text="CID Type", command=lambda: setup_jump(self.getcheckedDevice()))
 
         self.roCarrier = CTkEntry(self.tools_bar, width=150)#, text="ro.carrier", command=lambda:erase_mult(self.getcheckedDevice()))
-
-    #product1 = ('hawao')
-    #url = ("https://artifacts.mot.com/artifactory/" + str(product1) + "/")
+    
+        
 
     def getcheckedDevice(self):
         checkedDevices = []
@@ -204,47 +252,80 @@ class MultF_Tela(CTkFrame):
                 deviceInfo.append(device.product)
                 checkedDevices.append(deviceInfo)                
         return(checkedDevices)
+    
+    def return_url_list(self):
+        convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
+        headers = {
+            'Authorization': f'Basic {convert}'
+        }
+        site = requests.get(self.url, headers=headers)
+        soup = BeautifulSoup(site.content, 'html.parser')
+        element_list = soup.find_all('a')
+        resultados = [element.get_text() for element in element_list]
+        return resultados
+
    
 
     def updateProductLabel(self, product):
         self.commonProduct=product
         self.product.configure(text=product)
+        self.updateAndroidVer([])
+        self.updateBuildId([])
+        self.updateProductName([])
+        self.updateuserType([])
+        self.updateCid([])
 
     def updateAndroidVer(self, resultados):
-        self.androidVer.configure(values=resultados)
+        self.androidVer_.configure(values=resultados)
+        self.androidVer_.set("OS Version")
+        self.updateBuildId([])
+        self.updateProductName([])
+        self.updateuserType([])
+        self.updateCid([])
 
-    #def updateBuildId(self, resultados):
-        #self.buildId.configure(values=resultados2)
+    def updateBuildId(self, resultados):
+        self.buildId.configure(values=resultados)
+        self.buildId.set("Build ID")
+        self.updateProductName([])
+        self.updateuserType([])
+        self.updateCid([])
 
     def updateProductName(self, resultados):
         self.productName.configure(values=resultados)
+        self.productName.set("Product Name")
+        self.updateuserType([])
+        self.updateCid([])
 
     def updateuserType(self, resultados):
         self.userType.configure(values=resultados)
+        self.userType.set("User Type")
+        self.updateCid([])
     
     def updateCid(self, resultados):
         self.cidType.configure(values=resultados)
+        self.cidType.set("CID")
 
-    def on_androidVer_select(event):
+    def update_combobox(self):
         global url
-        selected_value = self.androidVer.get()
-        url = url + selected_value
-        print(url)
-        update_combobox()
-    
-    def update_combobox():
-        global url
+        convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
+        headers = {
+        'Authorization': f'Basic {convert}'
+        }
 
         site = requests.get(url, headers=headers)
         soup = BeautifulSoup(site.content, 'html.parser')
         element_list = soup.find_all('a')
- 
+
         resultados2 = [element.get_text() for element in element_list]
         self.buildId['values'] = list(resultados2)
 
+    def on_androidVer_select(self, event):
+        global url
+        selected_value = self.androidVer
+        url = url + selected_value
+        print(url)
+        self.update_combobox()
     
-
-
     #widgets 
     def place(self, **kwargs):
         self.tools_bar.place(y=0)
@@ -253,7 +334,7 @@ class MultF_Tela(CTkFrame):
         self.deviceList.place(y=50)
         self.infoList.place(y=500)
         self.product.place(y=10, x=10)
-        self.androidVer.place(y=60, x=10)
+        self.androidVer_.place(y=60, x=10)
         self.buildId.place(y=10, x=180)
         self.productName.place(y=60, x=180)
         self.userType.place(y=10, x=350)
@@ -352,14 +433,16 @@ class MultF_Tela(CTkFrame):
 
         for device in self.deviceList_buttons_mf:
             device.pack()
+        self.url = "https://artifacts.mot.com/artifactory/"
 
 class DeviceButton(CTkButton):
     
-    def __init__(self, master, deviceInfo, tela):
+    def __init__(self, master, deviceInfo, tela: MultF_Tela):
         super() .__init__(master, width=270, height=100, fg_color="gray", command=self.click_device)
         self.isChecked = False
 
         self.tela = tela
+
         
         self.usbType = deviceInfo[0]
         self.barcode = deviceInfo[1]
@@ -405,40 +488,16 @@ class DeviceButton(CTkButton):
 
 ##########################################################################################################################################
             
-        self.configure(text=f'''
-Barcode: {self.barcode}
-Secure: {self.secure}
-SKU: {self.sku}
-Hardware rev: {self.hw_rev}
-Carrier: {self.carrier}
-Product: {self.product}
-''')
+        self.configure(text=f'Barcode: {self.barcode}\nSecure: {self.secure}\nSKU: {self.sku}\nHardware rev: {self.hw_rev}\nCarrier: {self.carrier}\nProduct: {self.product}')
         
     def click_device(self):
             if not self.isChecked:
                 if type(self.tela) == MultF_Tela:
                     if multF_tela.checkedDevices == 0:
                         multF_tela.updateProductLabel(self.product)
-                        
-                        self.url = ("https://artifacts.mot.com/artifactory/"+str(self.product)+"/")
-                        #print(self.url)
-                        user_= sys.argv[1]
-                        password_= sys.argv[2]
-                        #user_ = ("nmoraes")
-                        #password_ = ("Punick@2024")
-                        convert = base64.b64encode(f'{user_}:{password_}'.encode()).decode('ascii')
-                        headers = {
-                            'Authorization': f'Basic {convert}'
-                        }
-                        site = requests.get(self.url, headers=headers)
-                        soup = BeautifulSoup(site.content, 'html.parser')
-                        element_list = soup.find_all('a')
-                        global resultados
-                        resultados = [element.get_text() for element in element_list]
-                        print(resultados)
-                        multF_tela.updateAndroidVer(resultados)
-
-
+                        self.tela.url = f'{self.tela.url}{self.product}/' 
+                        self.tela.productId_url = self.tela.url
+                        multF_tela.updateAndroidVer(self.tela.return_url_list())
                         self.configure(fg_color="green")
                         self.isChecked = True
                         multF_tela.checkedDevices += 1
@@ -461,6 +520,7 @@ Product: {self.product}
                         self.configure(fg_color="gray")
                         self.isChecked = False
                         multF_tela.checkedDevices -= 1
+                    self.tela.url = "https://artifacts.mot.com/artifactory/"
                 else:
                     self.configure(fg_color="gray")
                     self.isChecked = False
