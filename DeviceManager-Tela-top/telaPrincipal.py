@@ -1,7 +1,7 @@
 from customtkinter import * 
 import os
 import subprocess
-from toolsBar_Bottons import *
+from toolsBar_Bottons import*
 import base64
 from bs4 import BeautifulSoup
 import requests
@@ -12,15 +12,14 @@ from urllib import request
 
 adb_path = f'"{os.path.dirname(__file__)}\\platform-tools\\adb.exe" '
 fastboot_path = f'"{os.path.dirname(__file__)}\\platform-tools\\fastboot.exe" '
-#user = sys.argv[1]
-#password = sys.argv[2]
-user = ("nmoraes")
-password = ("Punick@2024")
+
 
 
 class Scripts_Tela(CTkFrame):
-    def __init__(self, master): 
+    def __init__(self, master, user, password): 
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
+        self.user = user
+        self.password = password
         #widgets 
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
@@ -38,9 +37,9 @@ class Scripts_Tela(CTkFrame):
         self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=lambda:sim_type(self.getcheckedDevice()))
         self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM", command=lambda:sim_type2(self.getcheckedDevice()))
         self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO", command=lambda:change_radio(self.getcheckedDevice()))
-        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: setup_jump(self.getcheckedDevice()))
-        self.erase = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:erase_mult(self.getcheckedDevice()))
-        self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:fast_mode(self.getcheckedDevice()))
+        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: setup_jump_threading(self.getcheckedDevice()))
+        self.erase = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:erase_threading(self.getcheckedDevice()))
+        self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:fastboot_mode_threading(self.getcheckedDevice()))
     
     def place(self, **kwargs): 
         self.tools_bar.place(y=0)
@@ -152,17 +151,17 @@ class Scripts_Tela(CTkFrame):
         checkedDevices = []
         for device in self.deviceList_buttons:
             if device.isChecked:
-                deviceInfo = []
-                deviceInfo.append(device.usbType)
-                deviceInfo.append(device.barcode)
-                checkedDevices.append(deviceInfo)                
+                checkedDevices.append(device)                
         return(checkedDevices)
 
 resultados = ""
 
 class MultF_Tela(CTkFrame): 
-    def __init__(self, master): 
+    def __init__(self, master, user, password): 
         super().__init__(master, width=850, height=600, fg_color="gray", bg_color="gray")
+        self.user = user
+        self.password = password
+
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
@@ -179,7 +178,7 @@ class MultF_Tela(CTkFrame):
 
         #labels
         self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white", text="")
-        self.fastbootName =  CTkLabel(self.tools_bar, width=200, fg_color="white", text="")
+        # self.fastbootName =  CTkButton(self.tools_bar, width=30, text="ok", command=self.fastboot_download)
         
         #Combobox
         self.androidVer_url = ""
@@ -241,90 +240,93 @@ class MultF_Tela(CTkFrame):
                 self.url = f'{self.userType_url}{value}'
             self.cidType_url = self.url
             print(self.url)
-            fastboot_download()
+            self.fastboot_download()
         self.cidType = CTkComboBox(self.tools_bar, width=150, command= cidType_callback)
         self.cidType.set("CID")
 
         self.roCarrier = CTkEntry(self.tools_bar, width=150)
 
-        self.element_list = ""
-        def fastboot_download():
-            convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
-            headers = {
-                'Authorization': f'Basic {convert}'
-            }
-            site = requests.get(self.url, headers=headers)
-            soup = BeautifulSoup(site.content, 'html.parser')
-            self.element_list = soup.select_one("a[href*=fastboot]")
-            for element in self.element_list:
-                print(self.url+self.element_list.get_text())
-                print(self.element_list.get_text())
-                file_gz= self.element_list.get_text()
-                print(file_gz)
+    def fastboot_download(self):
+        convert = base64.b64encode(f'{self.user}:{self.password}'.encode()).decode('ascii')
+        headers = {
+            'Authorization': f'Basic {convert}'
+        }
+        site = requests.get(self.url, headers=headers)
+        soup = BeautifulSoup(site.content, 'html.parser')
+        element_list = soup.select_one("a[href*=fastboot]")
+        if element_list == None:
+            return
+        print(element_list)
+        for element in element_list:
+            print(self.url+element_list.get_text())
+            print(element_list.get_text())
+            file_gz = element_list.get_text()
+            print(file_gz)
 
-            nome = self.element_list.get_text()
-            nome = nome.replace(".tar.gz", "")
-            nome = nome.replace("fastboot_", "")
+        nome = element_list.get_text()
+        nome = nome.replace(".tar.gz", "")
+        nome = nome.replace("fastboot_", "")
 
-            if(os.path.exists(nome)) :
-                caminho_final = os.getcwd() + "\\" + nome
-                print("Arquivo já existe")
-            else :
-                #BAIXA A BUILD SELECIONADA
-                url2 = (self.url+self.element_list.get_text())
-                opener = request.build_opener()
-                opener.addheaders = [('Authorization', f'Basic {convert}')]
-                request.install_opener(opener)
+        if(os.path.exists(nome)) :
+            caminho_final = os.getcwd() + "\\" + nome
+            print("Arquivo já existe")
+        else :
+            #BAIXA A BUILD SELECIONADA
+            url2 = (self.url+element_list.get_text())
+            opener = request.build_opener()
+            opener.addheaders = [('Authorization', f'Basic {convert}')]
+            request.install_opener(opener)
 
+            request.urlretrieve(url2, file_gz)
+
+            diretorio_arquivo = os.getcwd()
+
+            caminho_arquivo = (f'{diretorio_arquivo}\\{file_gz}')
+
+            # Extraindo o conteúdo do arquivo .tar.gz
+            with tarfile.open(caminho_arquivo, 'r:gz') as tar:
+                tar.extractall(diretorio_arquivo)
                 request.urlretrieve(url2, file_gz)
 
                 diretorio_arquivo = os.getcwd()
 
                 caminho_arquivo = (f'{diretorio_arquivo}\\{file_gz}')
- 
-                # Extraindo o conteúdo do arquivo .tar.gz
-                with tarfile.open(caminho_arquivo, 'r:gz') as tar:
-                    tar.extractall(diretorio_arquivo)
-                    request.urlretrieve(url2, file_gz)
 
-                    diretorio_arquivo = os.getcwd()
-
-                    caminho_arquivo = (f'{diretorio_arquivo}\\{file_gz}')
-
-                    # Entrando na pasta extraída
-                    pasta_extraida = os.path.splitext(caminho_arquivo)[0]  
-                    # Remove a extensão .tar.gz
-                    os.chdir(pasta_extraida.replace(".tar", "").replace("fastboot_", ""))
-            
-                    # Armazenando o caminho na variável
-                    caminho_final = os.getcwd()
-                    os.remove(caminho_arquivo)
-                    caminho_arquivo = 0
-
-            print("Caminho final:", caminho_final)
-
-            def flash_mode(caminho_pasta, carrier):
-                try:
-                    # Mude para a pasta desejada
-                    os.chdir(caminho_pasta)
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase userdata")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst1")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst2")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem fb_mode_clear")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config bootmode """)
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase frp")
-                    subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config carrier {carrier}")
-
-                    os.system(f'flashall.bat /d {fastDevice[1]}')
-    
-                except Exception as e:
-                    print(f"Ocorreu um erro: {e}")
-
-            flash_mode(caminho_final, self.roCarrier)
+                # Entrando na pasta extraída
+                pasta_extraida = os.path.splitext(caminho_arquivo)[0]  
+                # Remove a extensão .tar.gz
+                os.chdir(pasta_extraida.replace(".tar", "").replace("fastboot_", ""))
         
+                # Armazenando o caminho na variável
+                caminho_final = os.getcwd()
+                os.remove(caminho_arquivo)
+                caminho_arquivo = 0
 
+        print("Caminho final:", caminho_final)
+
+        def flash_mode(caminho_pasta, carrier, checkedDevices):
+            try:
+                # Mude para a pasta desejada
+                for device in checkedDevices:
+
+                    os.chdir(caminho_pasta)
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} -w")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase cache")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase userdata")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase modemst1")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase modemst2")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem fb_mode_clear")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem config bootmode """)
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase frp")
+                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem config carrier {carrier}")
+
+                    os.system(f'flashall.bat /d {device[1]}')
+    
+            except Exception as e:
+                print(f"Ocorreu um erro: {e}")
+
+        flash_mode(caminho_final, self.roCarrier)
+        
     def getcheckedDevice(self):
         checkedDevices = []
         for device in self.deviceList_buttons_mf:
@@ -333,11 +335,13 @@ class MultF_Tela(CTkFrame):
                 deviceInfo.append(device.usbType)
                 deviceInfo.append(device.barcode)
                 deviceInfo.append(device.product)
-                checkedDevices.append(deviceInfo)                
+                deviceInfo.append(device.isWorking)
+                
+                checkedDevices.append(device)                
         return(checkedDevices)
     
     def return_url_list(self):
-        convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
+        convert = base64.b64encode(f'{self.user}:{self.password}'.encode()).decode('ascii')
         headers = {
             'Authorization': f'Basic {convert}'
         }
@@ -386,7 +390,7 @@ class MultF_Tela(CTkFrame):
 
     def update_combobox(self):
         global url
-        convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
+        convert = base64.b64encode(f'{self.user}:{self.password}'.encode()).decode('ascii')
         headers = {
         'Authorization': f'Basic {convert}'
         }
@@ -400,7 +404,7 @@ class MultF_Tela(CTkFrame):
 
     def on_androidVer_select(self, event):
         global url
-        selected_value = self.androidVer
+        selected_value = self.androidVer_
         url = url + selected_value
         print(url)
         self.update_combobox()
@@ -419,7 +423,7 @@ class MultF_Tela(CTkFrame):
         self.userType.place(y=10, x=350)
         self.cidType.place(y=60, x=350)
         self.roCarrier.place(y=10, x=520)
-        self.fastbootName.place(y=60, x=520)
+        # self.fastbootName.place(y=60, x=520)
         return super().place(**kwargs)
 
     def place_forget(self): 
@@ -530,6 +534,7 @@ class DeviceButton(CTkButton):
         self.hw_rev = deviceInfo[4]
         self.carrier = deviceInfo[5]
         self.product = deviceInfo[6]
+        self.isWorking = False
 
 
         #Informações adicionais
@@ -570,67 +575,50 @@ class DeviceButton(CTkButton):
         self.configure(text=f'Barcode: {self.barcode}\nSecure: {self.secure}\nSKU: {self.sku}\nHardware rev: {self.hw_rev}\nCarrier: {self.carrier}\nProduct: {self.product}')
         
     def click_device(self):
+        if not self.isWorking:
             if not self.isChecked:
                 if type(self.tela) == MultF_Tela:
-                    if multF_tela.checkedDevices == 0:
-                        multF_tela.updateProductLabel(self.product)
+                    if self.tela.checkedDevices == 0:
+                        self.tela.updateProductLabel(self.product)
                         self.tela.url = f'{self.tela.url}{self.product}/' 
                         self.tela.productId_url = self.tela.url
-                        multF_tela.updateAndroidVer(self.tela.return_url_list())
+                        self.tela.updateAndroidVer(self.tela.return_url_list())
                         self.configure(fg_color="green")
                         self.isChecked = True
-                        multF_tela.checkedDevices += 1
+                        self.tela.checkedDevices += 1
                     else:
-                        if multF_tela.commonProduct == self.product:
+                        if self.tela.commonProduct == self.product:
                             self.configure(fg_color="green")
                             self.isChecked = True
-                            multF_tela.checkedDevices += 1
+                            self.tela.checkedDevices += 1
                 else:
                     self.configure(fg_color="green")
                     self.isChecked = True
             else:
                 if type(self.tela) == MultF_Tela:
-                    if multF_tela.checkedDevices == 1:
-                        multF_tela.updateProductLabel("")
+                    if self.tela.checkedDevices == 1:
+                        self.tela.updateProductLabel("")
                         self.configure(fg_color="gray")
                         self.isChecked = False
-                        multF_tela.checkedDevices -= 1
-                    elif multF_tela.checkedDevices > 1:
+                        self.tela.checkedDevices -= 1
+                    elif self.tela.checkedDevices > 1:
                         self.configure(fg_color="gray")
                         self.isChecked = False
-                        multF_tela.checkedDevices -= 1
+                        self.tela.checkedDevices -= 1
                     self.tela.url = "https://artifacts.mot.com/artifactory/"
                 else:
                     self.configure(fg_color="gray")
                     self.isChecked = False
-    
-base = CTk() 
-base.geometry("1000x600") 
-base._set_appearance_mode("dark") 
-base.title("Motorola Device Manager") 
-base.resizable(False, False) 
-        
-multF_tela = MultF_Tela(base) 
-scripts_tela = Scripts_Tela(base) 
+        else:
+            print(f"Device is busy: {self.barcode}")
+    def switch_working(self):
+        if not self.isWorking:
+            self.configure(fg_color="yellow")
+            self.isWorking = True
+        else:
+            if self.isChecked:
+                self.configure(fg_color="green")
+            else:
+                self.configure(fg_color="gray")
+            self.isWorking = False
 
-#Transição de Telas
-def hide_tabs(): 
-    multF_tela.place_forget() 
-    scripts_tela.place_forget() 
-
-def show_multF(): 
-    hide_tabs() 
-    multF_tela.place(x=150) 
-
-def show_scripts(): 
-    hide_tabs() 
-    scripts_tela.place(x=150) 
-
-#Frames Principais
-menuLateral = CTkFrame(base, width=150, height=600, fg_color="#191970", bg_color="#191970").place(x=0) 
-multflash = CTkButton(menuLateral, text="MultiFlash", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_multF).place(x=0) 
-Scripts = CTkButton(menuLateral, text="Tools", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_scripts).place(x=0, y=80) 
-multF_tela.place(x=150) 
-
-
-base.mainloop()

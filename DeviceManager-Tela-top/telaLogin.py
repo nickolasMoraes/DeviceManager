@@ -39,7 +39,7 @@ password_.place(x=20, y=150)
 def click():
         loginValidate = checkLogin(user_.get(), password_.get())
         if(loginValidate) :
-                os.system(f'start \"DM\" cmd /c py {os.path.dirname(__file__)}\\telaPrincipal.py {user_.get()} {password_.get()}')
+                os.system(f'start \"DM\" cmd /c py {os.path.dirname(__file__)}\\telaPrincipal_exec.py {user_.get()} {password_.get()}')
                 quit()
                 
         else : 
