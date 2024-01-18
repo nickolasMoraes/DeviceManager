@@ -178,7 +178,7 @@ class MultF_Tela(CTkFrame):
 
         #labels
         self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white", text="")
-        # self.fastbootName =  CTkButton(self.tools_bar, width=30, text="ok", command=self.fastboot_download)
+        self.fastbootName =  CTkButton(self.tools_bar, width=30, text="ok", command=self.thread_fast)
         
         #Combobox
         self.androidVer_url = ""
@@ -240,30 +240,31 @@ class MultF_Tela(CTkFrame):
                 self.url = f'{self.userType_url}{value}'
             self.cidType_url = self.url
             print(self.url)
-            self.fastboot_download()
         self.cidType = CTkComboBox(self.tools_bar, width=150, command= cidType_callback)
         self.cidType.set("CID")
 
         self.roCarrier = CTkEntry(self.tools_bar, width=150)
 
-    def fastboot_download(self):
-        convert = base64.b64encode(f'{self.user}:{self.password}'.encode()).decode('ascii')
+    def fastboot_download(self, checkedDevices, user, password):
+        convert = base64.b64encode(f'{user}:{password}'.encode()).decode('ascii')
         headers = {
             'Authorization': f'Basic {convert}'
         }
         site = requests.get(self.url, headers=headers)
         soup = BeautifulSoup(site.content, 'html.parser')
-        element_list = soup.select_one("a[href*=fastboot]")
-        if element_list == None:
+        self.element_list = soup.select_one("a[href*=fastboot]")
+        print(self.element_list)
+        if self.element_list == None:
+            print("Fastboot build not found")
             return
-        print(element_list)
-        for element in element_list:
-            print(self.url+element_list.get_text())
-            print(element_list.get_text())
-            file_gz = element_list.get_text()
+        for element in self.element_list:
+            print(element.get_text())
+            print(self.url+self.element_list.get_text())
+            print(self.element_list.get_text())
+            file_gz= self.element_list.get_text()
             print(file_gz)
 
-        nome = element_list.get_text()
+        nome = self.element_list.get_text()
         nome = nome.replace(".tar.gz", "")
         nome = nome.replace("fastboot_", "")
 
@@ -271,8 +272,9 @@ class MultF_Tela(CTkFrame):
             caminho_final = os.getcwd() + "\\" + nome
             print("Arquivo já existe")
         else :
+            print("build nao existe")
             #BAIXA A BUILD SELECIONADA
-            url2 = (self.url+element_list.get_text())
+            url2 = (self.url+self.element_list.get_text())
             opener = request.build_opener()
             opener.addheaders = [('Authorization', f'Basic {convert}')]
             request.install_opener(opener)
@@ -302,31 +304,33 @@ class MultF_Tela(CTkFrame):
                 os.remove(caminho_arquivo)
                 caminho_arquivo = 0
 
-        print("Caminho final:", caminho_final)
+        for device in checkedDevices :
+            self.flash_mode(caminho_final, self.roCarrier, device, user, password)
 
-        def flash_mode(caminho_pasta, carrier, checkedDevices):
+    def flash_mode(caminho_pasta, carrier, fastDevice):
+        # print(f"BAIXANDO BUILD DO {fastDevice[1]}")
             try:
                 # Mude para a pasta desejada
-                for device in checkedDevices:
+                os.chdir(caminho_pasta)
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase userdata")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst1")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst2")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem fb_mode_clear")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config bootmode """)
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase frp")
+                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config carrier {carrier}")
 
-                    os.chdir(caminho_pasta)
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} -w")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase cache")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase userdata")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase modemst1")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase modemst2")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem fb_mode_clear")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem config bootmode """)
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} erase frp")
-                    subprocess.getoutput(fastboot_path + f" -s {device[1]} oem config carrier {carrier}")
+                os.system(f'flashall.bat /d {fastDevice[1]}')
 
-                    os.system(f'flashall.bat /d {device[1]}')
-    
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")
-
-        flash_mode(caminho_final, self.roCarrier)
         
+    def thread_fast(self):
+        thread = threading.Thread(target=lambda:self.fastboot_download(self.getcheckedDevice(), self.user, self.password))
+        thread.start()
+    
     def getcheckedDevice(self):
         checkedDevices = []
         for device in self.deviceList_buttons_mf:
@@ -423,7 +427,7 @@ class MultF_Tela(CTkFrame):
         self.userType.place(y=10, x=350)
         self.cidType.place(y=60, x=350)
         self.roCarrier.place(y=10, x=520)
-        # self.fastbootName.place(y=60, x=520)
+        self.fastbootName.place(y=60, x=520)
         return super().place(**kwargs)
 
     def place_forget(self): 
