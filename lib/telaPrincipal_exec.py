@@ -3,13 +3,11 @@ from telaPrincipal import*
 sys.path.append('lib\\models')
 from user_model import User
 
-
-
 base = CTk() 
 base.geometry("1000x600") 
 base._set_appearance_mode("dark") 
 base.title("Motorola Device Manager") 
-base.resizable(False, False) 
+base.resizable(False, False)
 
 currentUser = User.getUser()
 
