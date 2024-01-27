@@ -1,7 +1,7 @@
+from CTkScrollableDropdown import *
 from customtkinter import * 
 import os
 import subprocess
-from toolsBar_Bottons import*
 import base64
 from bs4 import BeautifulSoup
 import requests
@@ -11,17 +11,123 @@ import threading
 from urllib import request
 from constants import *
 from PIL import Image
+import time
+
+
+class ProcessLog(CTkFrame):
+    def __init__(self, master, title, barcode, ro_carrier=None, option=None, SKU=None, radio=None):
+        super().__init__(master, width=550, height=50, fg_color="#F5F5F5", bg_color="#F5F5F5")
+        self.title = title
+        self.barcode = barcode
+        self.ro_carrier = ro_carrier
+        self.option = option
+        self.sku = SKU
+        self.radio = radio
+
+        if self.ro_carrier != None:
+            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+            self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+            self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+            self.ro_carrier_label = CTkLabel(self, width=137, height=30, text=ro_carrier)
+        elif self.option != None:
+            if self.option == 1:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.option_label = CTkLabel(self, width=137, height=30, text="Single SIM")
+            elif self.option == 2:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.option_label = CTkLabel(self, width=137, height=30, text="Dual SIM")
+            elif self.option == 3:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.option_label = CTkLabel(self, width=137, height=30, text="p-SIM")
+            elif self.option == 4:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.option_label = CTkLabel(self, width=137, height=30, text="e-SIM")
+            elif self.sku != None:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.sku_label = CTkLabel(self, width=137, height=30, text=self.sku)
+        elif radio != None:
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.radio_label = CTkLabel(self, width=137, height=30, text=self.radio)
+        else:
+            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+            self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
+            self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+            self.empty_label = CTkLabel(self, width=137, height=30, text="-")
+
+    def complete_Process(self):
+        self.process_Label.configure(text="Complete:", text_color="green")
+    
+    def pack(self, **kwargs):
+        if self.ro_carrier != None:
+            self.barcode_Label.pack(side=LEFT)
+            self.barcode_Label.pack_propagate(False)
+            self.process_Label.pack(side=LEFT)
+            self.process_Label.pack_propagate(False)
+            self.title_Label.pack(side=LEFT)
+            self.title_Label.pack_propagate(False)
+            self.ro_carrier_label.pack(side=LEFT)
+            self.ro_carrier_label.pack_propagate(False)
+        elif self.option != None:
+            self.barcode_Label.pack(side=LEFT)
+            self.barcode_Label.pack_propagate(False)
+            self.process_Label.pack(side=LEFT)
+            self.process_Label.pack_propagate(False)
+            self.title_Label.pack(side=LEFT)
+            self.title_Label.pack_propagate(False)
+            self.option_label.pack(side=LEFT)
+            self.option_label.pack_propagate(False)
+        elif self.sku != None:
+            self.barcode_Label.pack(side=LEFT)
+            self.barcode_Label.pack_propagate(False)
+            self.process_Label.pack(side=LEFT)
+            self.process_Label.pack_propagate(False)
+            self.title_Label.pack(side=LEFT)
+            self.title_Label.pack_propagate(False)
+            self.sku_label.pack(side=LEFT)
+            self.sku_label.pack_propagate(False)
+        elif self.radio != None:
+            self.barcode_Label.pack(side=LEFT)
+            self.barcode_Label.pack_propagate(False)
+            self.process_Label.pack(side=LEFT)
+            self.process_Label.pack_propagate(False)
+            self.title_Label.pack(side=LEFT)
+            self.title_Label.pack_propagate(False)
+            self.radio_label.pack(side=LEFT)
+            self.radio_label.pack_propagate(False)
+        else:
+            self.barcode_Label.pack(side=LEFT)
+            self.barcode_Label.pack_propagate(False)
+            self.process_Label.pack(side=LEFT)
+            self.process_Label.pack_propagate(False)
+            self.title_Label.pack(side=LEFT)
+            self.title_Label.pack_propagate(False)
+            self.empty_label.pack(side=LEFT)
+            self.empty_label.pack_propagate(False)
+        print("processo criado")
+        return super().pack(**kwargs) 
 
 class Scripts_Tela(CTkFrame):
-    def __init__(self, master, user, password): 
+    def __init__(self, master, user, password, ): 
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.user = user
         self.password = password
         #widgets 
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.logFrame = CTkScrollableFrame(self, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3", scrollbar_button_color=None)
         self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
-        self.infoList = CTkFrame(self, width=550, height=100, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList_buttons = []
     
         #Botão refresh
@@ -30,14 +136,14 @@ class Scripts_Tela(CTkFrame):
 
         #Botões tools Bar
 
-        self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:set_carrier(self.getcheckedDevice()))
-        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=lambda:change_sku(self.getcheckedDevice()))
-        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=lambda:sim_type(self.getcheckedDevice()))
-        self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM", command=lambda:sim_type2(self.getcheckedDevice()))
-        self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO", command=lambda:change_radio(self.getcheckedDevice()))
-        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: setup_jump_threading(self.getcheckedDevice()))
-        self.erase = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:erase_threading(self.getcheckedDevice()))
-        self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:fastboot_mode_threading(self.getcheckedDevice()))
+        self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:self.set_carrier(self.getcheckedDevice()))
+        self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=lambda:self.change_sku(self.getcheckedDevice()))
+        self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=lambda:self.sim_type(self.getcheckedDevice()))
+        self.eSim = CTkButton(self.tools_bar, width=150, text="eSIM / pSIM", command=lambda:self.sim_type2(self.getcheckedDevice()))
+        self.changeRadio = CTkButton(self.tools_bar, width=150, text="Change RADIO", command=lambda:self.change_radio(self.getcheckedDevice()))
+        self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: self.setup_jump_threading(self.getcheckedDevice()))
+        self.erase_button = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:self.erase_threading(self.getcheckedDevice()))
+        self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:self.fastboot_mode_threading(self.getcheckedDevice()))
     
     def place(self, **kwargs): 
         self.tools_bar.place(y=0)
@@ -48,13 +154,11 @@ class Scripts_Tela(CTkFrame):
         self.eSim.place(y=60, x=180)
         self.changeRadio.place(y=10, x=350)
         self.setupJump.place(y=60, x=350)
-        self.erase.place(y=10, x=520)
+        self.erase_button.place(y=10, x=520)
         self.refreshButton.place(y=4, x=240)
         self.deviceList.place(y=50)
-        self.infoList.place(y=500)
         self.fastboot_mode.place(y=60, x=520)
-        
-
+        self.logFrame.place(y=100)
         return super().place(**kwargs) 
     
     def place_forget(self): 
@@ -117,9 +221,9 @@ class Scripts_Tela(CTkFrame):
                 if secure.find("no devices") != -1:
                     return
                 else:
-                    if secure.find("0") != -1:
+                    if secure.find("no") != -1:
                         fastDevice.append("No")
-                    elif secure.find("1") != -1:
+                    elif secure.find("yes") != -1:
                         fastDevice.append("Yes")
                 
                 sku = subprocess.getoutput(fastboot_path + f"getvar sku -s {fastDevice[1]}")
@@ -152,17 +256,309 @@ class Scripts_Tela(CTkFrame):
                 checkedDevices.append(device)                
         return(checkedDevices)
 
+    def set_carrier(self, checkedDevices):
+        base = CTkToplevel() 
+        base.geometry("300x200")
+        base.title("Set Carrier")
+        base.resizable(False, False) 
+        label = CTkLabel (base, text = "Enter the ro.carrier:").place(x=95, y=3)
+        ro_carrier = CTkEntry(base, width=100)
+        ro_carrier.place(x=100, y=30)
+        def click_carrier(device, ro_carrier):
+            log = self.start_Process("Set Carrier", device.barcode, ro_carrier)
+            device.switch_working()
+            if device.usbType == "FAST":
+                subprocess.call(fastboot_path + f'oem config fsg-id "" -s {device.barcode}')
+                subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                subprocess.call(fastboot_path + f'oem config carrier "{ro_carrier}" -s {device.barcode}')
+                subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                self.erase(device)
+                subprocess.call(fastboot_path + f"reboot -s {device.barcode}")
+            elif device.usbType == "ADB":
+                print(f"The following device is not in Fastboot Mode: {device.barcode}")
+            time.sleep(75)
+            device.switch_working()
+            log.complete_Process()
+            
+        #threading set_carrier
+        def set_carrier_threading(checkedDevices, ro_carrier):
+            for device in checkedDevices:
+                if device.isWorking == False:
+                    global set_carrier_thread
+                    set_carrier_thread = threading.Thread(target=lambda:click_carrier(device, ro_carrier))
+                    set_carrier_thread.start()
+                else:
+                    print(f"Device is busy: {device.barcode}")
+            base.destroy()     
+        button = CTkButton(base, text="Set", width=100, command=lambda:set_carrier_threading(checkedDevices, ro_carrier.get()))
+        button.place(x=100, y=60)
+        base.after(100, base.lift)
+        
+    #Setup Jump
+    def setup_jump(self, device):
+        log = self.start_Process("Setup Jump", device.barcode)
+        device.switch_working()
+        if device.usbType == "ADB":
+            subprocess.call(adb_path + f"-s {device.barcode} shell content insert --uri content://settings/secure --bind name:s:user_setup_complete --bind value:s:1")
+            subprocess.call(adb_path + f"-s {device.barcode} reboot bootloader")
+            subprocess.call(fastboot_path + f"reboot -s {device.barcode}")
+        elif device.usbType == "FAST":
+            print(f"The following device is not in ADB Mode: {device}")
+        device.switch_working()
+        log.complete_Process()
+
+    def setup_jump_threading(self, checkedDevices):
+        for device in checkedDevices:
+            if device.isWorking == False:
+                thread = threading.Thread(target=lambda:self.setup_jump(device))
+                thread.start()
+            else:
+                print(f"Device is busy: {device.barcode}")
+        
+    def setup_jump_1(self, device):
+        subprocess.call(adb_path + f"-s {device} shell content insert --uri content://settings/secure --bind name:s:user_setup_complete --bind value:s:1")
+        subprocess.call(adb_path + f"-s {device} reboot bootloader")
+        subprocess.call(fastboot_path + f"reboot -s {device}")
+
+    #change SKU
+    def change_sku(self, checkedDevices):
+        base = CTkToplevel(fg_color="white") 
+        base.geometry("300x200") 
+        base.title("Set SKU") 
+        base.resizable(False, False) 
+        label = CTkLabel (base, text = "Enter the SKU:", text_color="black").place(x=95, y=3)
+        SKU = CTkEntry (base, fg_color="white", text_color="black", width=100)
+        SKU.place(x=100, y=30)
+        def click_SKU(device, SKU):
+            log = self.start_Process("Change SKU", device.barcode, SKU)
+            device.switch_working()
+            if device.usbType == "FAST":
+                subprocess.call(fastboot_path + f"oem config sku {SKU} -s {device.barcode}")
+                subprocess.call(fastboot_path + f"oem config carrier_sku {SKU} -s {device.barcode}")
+                subprocess.call(fastboot_path + f"reboot bootloader -s {device.barcode}")
+            elif device.usbType == "ADB":
+                print(f"The following device is not in Fastboot Mode: {device}")
+            device.switch_working()
+            log.complete_Process()
+        def change_SKU_threading(checkedDevices, SKU):
+            for device in checkedDevices:
+                if device.isWorking == False:
+                    thread = threading.Thread(target=lambda:click_SKU(device, SKU))
+                    thread.start()
+                else:
+                    print(f"Device is busy: {device.barcode}")  
+            base.destroy()       
+
+        button = CTkButton(base, text="Set", width=100, command=lambda:change_SKU_threading(checkedDevices, SKU.get())).place(x=100, y=60)
+        base.after(100, base.lift)
+        
+    #Dual/Single SIM
+    def sim_type(self, checkedDevices):
+        base = CTkToplevel(fg_color="white") 
+        base.geometry("300x200")  
+        base.title("Set SIM Type")
+        base.resizable(False, False) 
+        option = IntVar(value=0)
+        ss = CTkRadioButton (base, text="Single SIM", text_color="black", variable=option, value=1)
+        ss.place(x=95, y=30)
+        ds = CTkRadioButton (base, text="Dual SIM", text_color="black", variable=option, value=2)
+        ds.place(x=95, y=80)
+        def change(device, option):
+            log = self.start_Process("SS/DS SIM", device.barcode, option=option)
+            device.switch_working()
+            if device.usbType == "FAST":
+                if option == 1:
+                    subprocess.call(fastboot_path + f"oem hw dualsim false -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+                    subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+                elif option == 2:
+                    subprocess.call(fastboot_path + f"oem hw dualsim true -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+                    subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+            elif device.usbType == "ADB":
+                print(base, text=f"The following device is not in Fastboot Mode: {device}")
+            device.switch_working()
+            log.complete_Process()
+        
+        def sim_type_threading(checkedDevices, option):
+            for device in checkedDevices:
+                if device.isWorking == False:
+                    thread = threading.Thread(target=lambda:change(device, option))
+                    thread.start()
+                else:
+                    print(f"Device is busy: {device.barcode}")
+            base.destroy()
+        button = CTkButton(base, text="Set", width=100, command=lambda:sim_type_threading(checkedDevices, option.get())).place(x=95, y=110)
+        base.after(100, base.lift)
+        
+    #E/P-SIM
+    def sim_type2(self, checkedDevices):
+        base = CTkToplevel(fg_color="white") 
+        base.geometry("300x200")  
+        base.title("Set SIM Type")
+        base.resizable(False, False) 
+        option = IntVar(value=0)
+        ps = CTkRadioButton (base, text="p-SIM", text_color="black", variable=option, value=3)
+        ps.place(x=95, y=30)
+        es = CTkRadioButton (base, text="e-SIM", text_color="black", variable=option, value=4)
+        es.place(x=95, y=80)
+        def change(device, option):
+            log = self.start_Process("Set Carrier", device.barcode, option=option)
+            device.switch_working()
+            if device.usbType == "FAST":
+                if option == 3:
+                    subprocess.call(fastboot_path + f"oem hw esim false -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+                    subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+
+                elif option == 4:
+                    subprocess.call(fastboot_path + f"fastboot oem hw esim true -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                    subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+                    subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+                    
+            elif device.usbType == "ADB":
+                print(base, text=f"The following device is not in Fastboot Mode:\n{device}")
+            device.switch_working()
+            log.complete_Process()
+        def esim_threading(checkedDevices, option):
+            for device in checkedDevices:
+                if device.isWorking == False:
+                    thread = threading.Thread(target=lambda:change(device, option))
+                    thread.start()
+                else:
+                    print(f"Device is busy: {device.barcode}")
+            base.destroy()
+        
+        button = CTkButton(base, text="Set", width=100, command=lambda:esim_threading(checkedDevices, option.get())).place(x=95, y=110)
+        base.after(100, base.lift)
+
+    #erases
+    def erase_mult(self, device):
+            log = self.start_Process("Erase Device", device.barcode)
+            device.switch_working()
+            if device.usbType == "FAST":
+                subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+                subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+                subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+            elif device.usbType == "ADB":
+                print(f"The following devices are not in Fastboot Mode:\n{device}")
+            device.switch_working()
+            log.complete_Process()
+    def erase_threading(self, checkedDevices):
+        for device in checkedDevices:
+            if device.isWorking == False:
+                thread = threading.Thread(target=lambda:self.erase_mult(device))
+                thread.start()
+            else:
+                print(f"Device is busy: {device.barcode}")
+
+    def erase(self, device):
+        subprocess.call(fastboot_path + f"erase frp -s {device.barcode}")
+        subprocess.call(fastboot_path + f"-w -s {device.barcode}")
+        subprocess.call(fastboot_path + f"erase userdata -s {device.barcode}")
+        subprocess.call(fastboot_path + f"erase cache -s {device.barcode}")
+        subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+        subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+        subprocess.call(fastboot_path + f"oem fb_mode_clear -s {device.barcode}")
+        subprocess.call(fastboot_path + f'oem config bootmode "" -s {device.barcode}')
+
+    #Change Radio
+    def change_radio(self, checkedDevices):
+        base = CTkToplevel(fg_color="white") 
+        base.geometry("300x200") 
+        base.title("Set RADIO") 
+        base.resizable(False, False) 
+        label = CTkLabel (base, text = "Enter new RADIO:", text_color="black").place(x=95, y=3)
+        radio = CTkEntry (base, fg_color="white", text_color="black", width=100)
+        radio.place(x=100, y=30)
+        def click_radio(device, radio):
+            log = self.start_Process("Change Radio", device.barcode, radio)
+            device.switch_working()
+            if device.usbType == "FAST":
+                subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
+                subprocess.call(fastboot_path + f"oem hw radio {radio} -s {device.barcode}")
+                subprocess.call(fastboot_path + f"reboot bootloader -s {device.barcode}")
+            elif device.usbType == "ADB":
+                print(f"The following devices are not in Fastboot Mode:\n{device}")
+                device.switch_working()
+                log.complete_Process()
+        def change_radio_threading(checkedDevices, radio):
+            for device in checkedDevices:
+                if device.isWorking == False:
+                    thread = threading.Thread(target=lambda:click_radio(device, radio))
+                    thread.start()
+                else:
+                    print(f"Device is busy: {device.barcode}")
+            base.destroy()
+        button = CTkButton(base, text="Set", width=100, command=change_radio_threading(checkedDevices, radio.get())).place(x=100, y=60)
+        base.after(100, base.lift)
+                   
+    #fastboot mode
+    def fast_mode(self, device):
+        log = self.start_Process("Fastboot Mode", device.barcode)
+        device.switch_working()
+        if device.usbType == "ADB":
+            subprocess.call(adb_path + f"-s {device.barcode} reboot bootloader")
+        elif device.usbType == "FAST":
+            print(f"The following devices are not in Fastboot Mode:\n{device}")
+        device.switch_working()
+        log.complete_Process()
+
+    def fastboot_mode_threading(self, checkedDevices):
+        for device in checkedDevices:
+            if device.isWorking == False:
+                thread = threading.Thread(target=lambda:self.fast_mode(device))
+                thread.start()
+            else:
+                print(f"Device is busy: {device.barcode}")
+
+    def start_Process(self, title, barcode, ro_carrier=None, option=None, SKU=None, radio=None):
+        log = ProcessLog(self.logFrame, title, barcode, ro_carrier, option, SKU, radio)
+        log.pack()
+        return log
+
 resultados = ""
 
 class MultF_Tela(CTkFrame): 
     def __init__(self, master, currentUser): 
-        super().__init__(master, width=850, height=600, fg_color="gray", bg_color="gray")
+        super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.token = currentUser.token
 
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
-        self.infoList = CTkFrame(self, width=550, height=50, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList_buttons_mf = []
         self.commonProduct = ""
         self.checkedDevices = 0
@@ -175,25 +571,26 @@ class MultF_Tela(CTkFrame):
         self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.refresh_device)
 
         #labels
-        self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white", text="")
+        self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white", text="", corner_radius=5)
         self.fastbootName =  CTkButton(self.tools_bar, width=30, text="ok", command=self.thread_fast)
         
         #Combobox
         self.androidVer_url = ""
         def androidV_callback(value):
+            self.androidVer_.set(value=value)
             if self.androidVer_url == "":
                 self.url = f'{self.url}{value}'
             else:
                 self.url = f'{self.productId_url}{value}'
             self.androidVer_url = self.url
-            print(self.url)
             self.updateBuildId(self.return_url_list())
-        self.androidVer_ = CTkComboBox(self.tools_bar, width=150, values=[], command=androidV_callback)
-        self.androidVer_.set("OS Version")
-        
+        self.androidVer_ = CTkComboBox(self.tools_bar, width=150)
+        self.androidVer_.set("Os Version")
+        self.osVer_= CTkScrollableDropdown(self.androidVer_, values = [], justify="left", button_color="transparent", command=androidV_callback)
 
         self.buildId_url = ""
         def buildId_callback(value):
+            self.buildId.set(value=value)
             if self.buildId_url == "":
                 self.url = f'{self.url}{value}'
             else:
@@ -201,12 +598,14 @@ class MultF_Tela(CTkFrame):
             self.buildId_url = self.url
             print(self.url)
             self.updateProductName(self.return_url_list())
-        self.buildId = CTkComboBox(self.tools_bar, width=150, command= buildId_callback)
+        self.buildId = CTkComboBox(self.tools_bar, width=150)
+        self.buildId_= CTkScrollableDropdown(self.buildId, values = [], justify="left", button_color="transparent", command=buildId_callback)
         self.buildId.set("Build ID")
         
 
         self.productName_url = ""
         def productName_callback(value):
+            self.productName.set(value=value)
             if self.productName_url == "":
                 self.url = f'{self.url}{value}'
             else:
@@ -214,12 +613,14 @@ class MultF_Tela(CTkFrame):
             self.productName_url = self.url
             print(self.url)
             self.updateuserType(self.return_url_list())
-        self.productName = CTkComboBox(self.tools_bar, width=150, command= productName_callback)
+        self.productName = CTkComboBox(self.tools_bar, width=150)
+        self.productName_= CTkScrollableDropdown(self.productName, values = [], justify="left", button_color="transparent", command=productName_callback)
         self.productName.set("Product Name")
         
 
         self.userType_url = ""
         def userType_callback(value):
+            self.userType.set(value=value)
             if self.userType_url == "":
                 self.url = f'{self.url}{value}'
             else:
@@ -227,18 +628,21 @@ class MultF_Tela(CTkFrame):
             self.userType_url = self.url
             print(self.url)
             self.updateCid(self.return_url_list())
-        self.userType = CTkComboBox(self.tools_bar, width=150, command= userType_callback)
+        self.userType = CTkComboBox(self.tools_bar, width=150)
+        self.userType_= CTkScrollableDropdown(self.userType, values = [], justify="left", button_color="transparent", command= userType_callback)
         self.userType.set("User Type")
 
         self.cidType_url = ""
         def cidType_callback(value):
+            self.cidType.set(value=value)
             if self.cidType_url == "":
                 self.url = f'{self.url}{value}'
             else:
                 self.url = f'{self.userType_url}{value}'
             self.cidType_url = self.url
             print(self.url)
-        self.cidType = CTkComboBox(self.tools_bar, width=150, command= cidType_callback)
+        self.cidType = CTkComboBox(self.tools_bar, width=150)
+        self.cidType_= CTkScrollableDropdown(self.cidType, values = [], justify="left", button_color="transparent", command= cidType_callback)
         self.cidType.set("CID")
 
         self.roCarrier = CTkEntry(self.tools_bar, width=150)
@@ -350,7 +754,9 @@ class MultF_Tela(CTkFrame):
         soup = BeautifulSoup(site.content, 'html.parser')
         element_list = soup.find_all('a')
         resultados = [element.get_text() for element in element_list]
+        print(resultados)
         return resultados
+        
 
     def updateProductLabel(self, product):
         self.commonProduct=product
@@ -362,29 +768,29 @@ class MultF_Tela(CTkFrame):
         self.updateCid([])
 
     def updateAndroidVer(self, resultados):
-        self.androidVer_.configure(values=resultados)
+        self.osVer_.configure(values=resultados)
         self.updateBuildId([])
         self.updateProductName([])
         self.updateuserType([])
         self.updateCid([])
 
     def updateBuildId(self, resultados):
-        self.buildId.configure(values=resultados)
+        self.buildId_.configure(values=resultados)
         self.updateProductName([])
         self.updateuserType([])
         self.updateCid([])
 
     def updateProductName(self, resultados):
-        self.productName.configure(values=resultados)
+        self.productName_.configure(values=resultados)
         self.updateuserType([])
         self.updateCid([])
 
     def updateuserType(self, resultados):
-        self.userType.configure(values=resultados)
+        self.userType_.configure(values=resultados)
         self.updateCid([])
     
     def updateCid(self, resultados):
-        self.cidType.configure(values=resultados)
+        self.cidType_.configure(values=resultados)
 
     def update_combobox(self):
         global url
@@ -412,7 +818,6 @@ class MultF_Tela(CTkFrame):
         self.deviceStatus.place(y=100, x=550)
         self.refreshButton.place(y=4, x=240)
         self.deviceList.place(y=50)
-        self.infoList.place(y=580)
         self.product.place(y=10, x=10)
         self.androidVer_.place(y=60, x=10)
         self.buildId.place(y=10, x=180)
@@ -484,9 +889,9 @@ class MultF_Tela(CTkFrame):
                 if secure.find("no devices") != -1:
                     return
                 else:
-                    if secure.find("0") != -1:
+                    if secure.find("no") != -1:
                         fastDevice.append("No")
-                    elif secure.find("1") != -1:
+                    elif secure.find("yes") != -1:
                         fastDevice.append("Yes")
                 
                 sku = subprocess.getoutput(fastboot_path + f"getvar sku -s {fastDevice[1]}")
@@ -502,8 +907,6 @@ class MultF_Tela(CTkFrame):
                 fastDevice.append(product[9:product.find("\n")])
 
                 fastList.append(fastDevice)
-        print(fastList)
-        print(adbList)
 
         for device in adbList:
             self.deviceList_buttons_mf.append(DeviceButton(self.deviceList, device, self))
@@ -515,14 +918,11 @@ class MultF_Tela(CTkFrame):
             device.pack()
         self.url = "https://artifacts.mot.com/artifactory/"
 
-class DeviceButton(CTkButton):
-    
+class DeviceButton(CTkButton): 
     def __init__(self, master, deviceInfo, tela: MultF_Tela):
         super() .__init__(master, width=250, height=100, fg_color="#191970", command=self.click_device)
         self.isChecked = False
-
         self.tela = tela
-        
         
         self.usbType = deviceInfo[0]
         self.barcode = deviceInfo[1]
@@ -608,6 +1008,7 @@ class DeviceButton(CTkButton):
                     self.isChecked = False
         else:
             print(f"Device is busy: {self.barcode}")
+    
     def switch_working(self):
         if not self.isWorking:
             self.configure(fg_color="yellow")
