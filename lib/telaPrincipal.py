@@ -12,6 +12,7 @@ from urllib import request
 from constants import *
 from PIL import Image
 import time
+from CTkTable import *
 
 
 class ProcessLog(CTkFrame):
@@ -23,48 +24,57 @@ class ProcessLog(CTkFrame):
         self.option = option
         self.sku = SKU
         self.radio = radio
+        self.log_Label = []
 
         if self.ro_carrier != None:
-            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
             self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
             self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
             self.ro_carrier_label = CTkLabel(self, width=137, height=30, text=ro_carrier)
+
         elif self.option != None:
             if self.option == 1:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="Single SIM")
+
             elif self.option == 2:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="Dual SIM")
+
             elif self.option == 3:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="p-SIM")
+
             elif self.option == 4:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="e-SIM")
+
             elif self.sku != None:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.sku_label = CTkLabel(self, width=137, height=30, text=self.sku)
+
         elif radio != None:
-                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+                self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
                 self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.radio_label = CTkLabel(self, width=137, height=30, text=self.radio)
+
         else:
-            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode)
+            self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=CENTER)
             self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
             self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
             self.empty_label = CTkLabel(self, width=137, height=30, text="-")
+
 
     def complete_Process(self):
         self.process_Label.configure(text="Complete:", text_color="green")
@@ -123,19 +133,26 @@ class Scripts_Tela(CTkFrame):
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.user = user
         self.password = password
+        value = [["Barcode", "Status", "Process", "input" ]]
         #widgets 
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
-        self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
-        self.logFrame = CTkScrollableFrame(self, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3", scrollbar_button_color=None)
-        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.deviceStatus = CTkFrame(self, width=270, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.logFrame = CTkFrame(self, width=580, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.logFrame_scroll = CTkScrollableFrame(self.logFrame, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3")
+        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=270, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.summary_label = CTkTable(self, row=1, column=4, width=135, values=value)
         self.deviceList_buttons = []
+        self.log_Label = []
     
         #Botão refresh
         refresh = CTkImage(Image.open("assets/refresh.png"), size=(45, 45))
         self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.refresh_device)
 
-        #Botões tools Bar
+        #botão clear
+        clear = CTkImage(Image.open("assets/trash.png"), size=(20, 20))
+        self.trashButton = CTkButton(self, width=30, image = clear, bg_color="transparent", fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.clear_log)
 
+        #Botões tools Bar
         self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:self.set_carrier(self.getcheckedDevice()))
         self.changeSKU = CTkButton(self.tools_bar, width=150, text="Change SKU", command=lambda:self.change_sku(self.getcheckedDevice()))
         self.singleSim = CTkButton(self.tools_bar, width=150, text="SS/DS SIM", command=lambda:self.sim_type(self.getcheckedDevice()))
@@ -144,10 +161,11 @@ class Scripts_Tela(CTkFrame):
         self.setupJump = CTkButton(self.tools_bar, width=150, text="Setup Jump", command=lambda: self.setup_jump_threading(self.getcheckedDevice()))
         self.erase_button = CTkButton(self.tools_bar, width=150, text="Erase", command=lambda:self.erase_threading(self.getcheckedDevice()))
         self.fastboot_mode = CTkButton(self.tools_bar, width=150, text="Fastboot Mode", command=lambda:self.fastboot_mode_threading(self.getcheckedDevice()))
+        
     
     def place(self, **kwargs): 
         self.tools_bar.place(y=0)
-        self.deviceStatus.place(y=100, x=550)
+        self.deviceStatus.place(y=100, x=580)
         self.setCarrier.place(y=10, x=10) 
         self.changeSKU.place(y=60, x=10)
         self.singleSim.place(y=10, x=180)
@@ -155,12 +173,20 @@ class Scripts_Tela(CTkFrame):
         self.changeRadio.place(y=10, x=350)
         self.setupJump.place(y=60, x=350)
         self.erase_button.place(y=10, x=520)
-        self.refreshButton.place(y=4, x=240)
-        self.deviceList.place(y=50)
+        self.refreshButton.place(y=4, x=210)
+        self.deviceList.place(y=80)
         self.fastboot_mode.place(y=60, x=520)
-        self.logFrame.place(y=100)
+        self.logFrame.place(y=130, x=0)
+        self.logFrame_scroll.place(y=0, x=0)
+        self.trashButton.place(y=100, x=530)
+        self.summary_label.place(y=100)
         return super().place(**kwargs) 
     
+    def clear_log(self):
+        for log in self.logFrame_scroll.pack_slaves():
+            log.pack_forget()
+            log.destroy()
+
     def place_forget(self): 
         '''Esquema de transição de telas'''
         for widget in self.place_slaves(): 
@@ -172,6 +198,7 @@ class Scripts_Tela(CTkFrame):
         while len(self.deviceList_buttons) > 0:
             self.deviceList_buttons[0].destroy()
             self.deviceList_buttons.pop(0)
+
 
         output = subprocess.getoutput(adb_path + "devices") # Barcode do Device em ADB
         serialADB = output.split("\n")
@@ -545,7 +572,8 @@ class Scripts_Tela(CTkFrame):
                 print(f"Device is busy: {device.barcode}")
 
     def start_Process(self, title, barcode, ro_carrier=None, option=None, SKU=None, radio=None):
-        log = ProcessLog(self.logFrame, title, barcode, ro_carrier, option, SKU, radio)
+        log = ProcessLog(self.logFrame_scroll, title, barcode, ro_carrier, option, SKU, radio)
+        self.log_Label.append(log)
         log.pack()
         return log
 
@@ -572,7 +600,8 @@ class MultF_Tela(CTkFrame):
 
         #labels
         self.product =  CTkLabel(self.tools_bar, width=150, fg_color="white", text="", corner_radius=5)
-        self.fastbootName =  CTkButton(self.tools_bar, width=30, text="ok", command=self.thread_fast)
+        fastbootName = CTkImage(Image.open("assets/send.png"), size=(30, 30))
+        self.fastbootName =  CTkButton(self.tools_bar, width=30, text=None,image=fastbootName , fg_color= "transparent", hover_color = "#191970", command=self.thread_fast)
         
         #Combobox
         self.androidVer_url = ""
@@ -825,7 +854,7 @@ class MultF_Tela(CTkFrame):
         self.userType.place(y=10, x=350)
         self.cidType.place(y=60, x=350)
         self.roCarrier.place(y=10, x=520)
-        self.fastbootName.place(y=60, x=520)
+        self.fastbootName.place(y=55, x=520)
         return super().place(**kwargs)
 
     def place_forget(self): 
