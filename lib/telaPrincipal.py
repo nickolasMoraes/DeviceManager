@@ -1,5 +1,6 @@
 from CTkScrollableDropdown import *
 from customtkinter import * 
+from tkinter import *
 import os
 import subprocess
 import base64
@@ -128,6 +129,35 @@ class ProcessLog(CTkFrame):
         print("processo criado")
         return super().pack(**kwargs) 
 
+class ProcessLog_M(CTkFrame):
+    def __init__(self, master, title, element_list, buildId):
+        super().__init__(master, width=550, height=50, fg_color="#F5F5F5", bg_color="#F5F5F5")
+        self.title = title
+        self.buildId = element_list
+        self.product = buildId
+        
+        self.product_label = CTkLabel(self, width=137, height=30, text=self.product, justify=RIGHT)
+        self.process_label = CTkLabel(self, width=137, height=30, text="Downloading:", text_color="red")
+        self.buildId_label = CTkLabel(self, width=137, height=30, text=self.buildId)
+        self.empty_label = CTkLabel(self, width=137, height=30, text="-")
+        
+    def flash_device(self):
+        self.process_label.configure(self, width=137, height=30, text="Flashing:", text_color="purple")
+    
+    def process_complete(self):
+        self.process_label = CTkLabel(self, width=137, height=30, text="complete:", text_color="green")
+        
+    def pack(self, **kwargs):
+        self.product_label.pack(side=LEFT)
+        self.product_label.pack_propagate()
+        self.process_label.pack(side=LEFT)
+        self.process_label.pack_propagate()
+        self.buildId_label.pack(side=LEFT)
+        self.buildId_label.pack_propagate()
+        self.empty_label.pack(side=LEFT)
+        self.empty_label.pack_propagate()
+        return super().pack(**kwargs)
+    
 class Scripts_Tela(CTkFrame):
     def __init__(self, master, user, password, ): 
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
@@ -174,12 +204,12 @@ class Scripts_Tela(CTkFrame):
         self.setupJump.place(y=60, x=350)
         self.erase_button.place(y=10, x=520)
         self.refreshButton.place(y=4, x=210)
-        self.deviceList.place(y=80)
         self.fastboot_mode.place(y=60, x=520)
         self.logFrame.place(y=130, x=0)
         self.logFrame_scroll.place(y=0, x=0)
         self.trashButton.place(y=100, x=530)
         self.summary_label.place(y=100)
+        self.deviceList.place(y=80)
         return super().place(**kwargs) 
     
     def clear_log(self):
@@ -583,16 +613,23 @@ class MultF_Tela(CTkFrame):
     def __init__(self, master, currentUser): 
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.token = currentUser.token
+        value = [["Product", "Status", "Build", "progress" ]]
 
         self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#191970", bg_color="#191970")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.summary_label = CTkTable(self, row=1, column=4, width=135, values=value)
+        self.logFrame = CTkFrame(self, width=580, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.logFrame_scroll = CTkScrollableFrame(self.logFrame, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.deviceList_buttons_mf = []
+        self.log_Label = []
         self.commonProduct = ""
         self.checkedDevices = 0
         self.url = "https://artifacts.mot.com/artifactory/"
         self.productId_url = ""
 
+        clear = CTkImage(Image.open("assets/trash.png"), size=(20, 20))
+        self.trashButton = CTkButton(self, width=30, image = clear, bg_color="transparent", fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.clear_log)
 
         #Botão refresh
         refresh = CTkImage(Image.open("assets/refresh.png"), size=(45, 45))
@@ -628,7 +665,7 @@ class MultF_Tela(CTkFrame):
             print(self.url)
             self.updateProductName(self.return_url_list())
         self.buildId = CTkComboBox(self.tools_bar, width=150)
-        self.buildId_= CTkScrollableDropdown(self.buildId, values = [], justify="left", button_color="transparent", command=buildId_callback)
+        self.buildId_= CTkScrollableDropdown(self.buildId, width=300, values = [], justify="left", button_color="transparent", command=buildId_callback)
         self.buildId.set("Build ID")
         
 
@@ -677,6 +714,10 @@ class MultF_Tela(CTkFrame):
         self.roCarrier = CTkEntry(self.tools_bar, width=150)
 
     def fastboot_download(self, checkedDevices, token):
+        self.buildId = self.buildId.get()
+        self.product = self.product.cget("text")
+        log = self.start_Process("Build Download", self.buildId, self.product)
+
         headers = {
             'Authorization': f'Basic {token}'
         }
@@ -694,14 +735,15 @@ class MultF_Tela(CTkFrame):
             file_gz= self.element_list.get_text()
             print(file_gz)
 
-        nome = self.element_list.get_text()
-        nome = nome.replace(".tar.gz", "")
-        nome = nome.replace("fastboot_", "")
+        self.nome = self.element_list.get_text()
+        self.nome = self.nome.replace(".tar.gz", "")
+        self.nome = self.nome.replace("fastboot_", "")
 
-        if(os.path.exists(nome)) :
-            caminho_final = os.getcwd() + "\\" + nome
+        if(os.path.exists(self.nome)) :
+            caminho_final = os.getcwd() + "\\" + self.nome
             print("Arquivo já existe")
         else :
+
             print("build nao existe")
             #BAIXA A BUILD SELECIONADA
             url2 = (self.url+self.element_list.get_text())
@@ -736,11 +778,13 @@ class MultF_Tela(CTkFrame):
 
         for device in checkedDevices :
             self.flash_mode(caminho_final, self.roCarrier, device)
+            log.flash_device()
+            log.process_complete()
 
     def flash_mode(caminho_pasta, carrier, fastDevice):
         # print(f"BAIXANDO BUILD DO {fastDevice[1]}")
             try:
-                # Mude para a pasta desejada
+                # Mude para a pasta desejada                                       '
                 os.chdir(caminho_pasta)
                 subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
                 subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
@@ -786,7 +830,6 @@ class MultF_Tela(CTkFrame):
         print(resultados)
         return resultados
         
-
     def updateProductLabel(self, product):
         self.commonProduct=product
         self.product.configure(text=product)
@@ -842,6 +885,11 @@ class MultF_Tela(CTkFrame):
         self.update_combobox()
     
     #widgets 
+    def clear_log(self):
+        for log in self.logFrame_scroll.pack_slaves():
+            log.pack_forget()
+            log.destroy()
+
     def place(self, **kwargs):
         self.tools_bar.place(y=0)
         self.deviceStatus.place(y=100, x=550)
@@ -855,6 +903,10 @@ class MultF_Tela(CTkFrame):
         self.cidType.place(y=60, x=350)
         self.roCarrier.place(y=10, x=520)
         self.fastbootName.place(y=55, x=520)
+        self.logFrame.place(y=130, x=0)
+        self.logFrame_scroll.place(y=0, x=0)
+        self.summary_label.place(y=100)
+        self.trashButton.place(y=100, x=530)
         return super().place(**kwargs)
 
     def place_forget(self): 
@@ -946,6 +998,12 @@ class MultF_Tela(CTkFrame):
         for device in self.deviceList_buttons_mf:
             device.pack()
         self.url = "https://artifacts.mot.com/artifactory/"
+
+    def start_Process(self, title, buildId, product):
+        log = ProcessLog_M(self.logFrame_scroll, title, buildId, product)
+        self.log_Label.append(log)
+        log.pack()
+        return log
 
 class DeviceButton(CTkButton): 
     def __init__(self, master, deviceInfo, tela: MultF_Tela):
