@@ -27,10 +27,13 @@ def show_scripts():
     hide_tabs() 
     scripts_tela.place(x=150) 
 
+
+flash = CTkImage(Image.open("assets/flash.png"), size=(90, 90))
+tools = CTkImage(Image.open("assets/Tools_2.png"), size=(85, 85))
 #Frames Principais
-menuLateral = CTkFrame(base, width=150, height=600, fg_color="#191970", bg_color="#191970").place(x=0) 
-multflash = CTkButton(menuLateral, text="MultiFlash", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_multF).place(x=0) 
-Scripts = CTkButton(menuLateral, text="Tools", width=150, height=80, fg_color="#191970", bg_color="#191970", command=show_scripts).place(x=0, y=80) 
+menuLateral = CTkFrame(base, width=150, height=600, fg_color="#3CB371", bg_color="#3CB371").place(x=0) 
+multflash = CTkButton(menuLateral, text=None, image=flash, width=150, height=80, fg_color="#3CB371", bg_color="#3CB371", hover=None, command=show_multF).place(x=0) 
+Scripts = CTkButton(menuLateral, text=None, image=tools, width=150, height=80, fg_color="#3CB371", bg_color="#3CB371", hover=None,command=show_scripts).place(x=0, y=80) 
 multF_tela.place(x=150) 
 
 
