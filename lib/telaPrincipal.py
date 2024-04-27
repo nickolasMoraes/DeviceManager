@@ -14,6 +14,9 @@ from constants import *
 from PIL import Image
 import time
 from CTkTable import *
+from CTkMessagebox import *
+import time
+import timeit
 
 
 class ProcessLog(CTkFrame):
@@ -26,6 +29,7 @@ class ProcessLog(CTkFrame):
         self.sku = SKU
         self.radio = radio
         self.log_Label = []
+        self.complete = False
 
         if self.ro_carrier != None:
             self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
@@ -79,6 +83,7 @@ class ProcessLog(CTkFrame):
 
     def complete_Process(self):
         self.process_Label.configure(text="Complete:", text_color="green")
+        self.complete = True
     
     def pack(self, **kwargs):
         if self.ro_carrier != None:
@@ -135,6 +140,7 @@ class ProcessLog_M(CTkFrame):
         self.title = title
         self.buildId = element_list
         self.product = buildId
+        self.complete = False
         
         self.product_label = CTkLabel(self, width=137, height=30, text=self.product, justify=RIGHT)
         self.process_label = CTkLabel(self, width=137, height=30, text="Downloading:", text_color="red")
@@ -144,11 +150,16 @@ class ProcessLog_M(CTkFrame):
     def flash_device(self):
         self.process_label.configure(text="Flashing:", text_color="purple")
     
-    def process_complete(self):
-        self.process_label.configure(text="complete:", text_color="green")
-    
     def process_extract(self):
-        self.process_label.configure(text="Extract:", text_color="yellow")
+        self.process_label.configure(text="Extract:", text_color="blue")
+
+    def process_complete(self):
+        self.process_label.configure(text="Complete:", text_color="green")
+        self.complete = True
+
+    def fast_notFound(self):
+        self.process_label.configure(text="Fastboot Not Found", text_color="orange")
+        self.complete = True
 
         
     def pack(self, **kwargs):
@@ -169,11 +180,11 @@ class Scripts_Tela(CTkFrame):
         self.password = password
         value = [["Barcode", "Status", "Process", "input" ]]
         #widgets 
-        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#228B22", bg_color="#228B22")
-        self.deviceStatus = CTkFrame(self, width=270, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#1E90FF", bg_color="#1E90FF")
+        self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
+        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.logFrame = CTkFrame(self, width=580, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.logFrame_scroll = CTkScrollableFrame(self.logFrame, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3")
-        self.deviceList = CTkScrollableFrame(self.deviceStatus, width=270, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.summary_label = CTkTable(self, row=1, column=4, width=135, values=value)
         self.deviceList_buttons = []
         self.log_Label = []
@@ -184,7 +195,7 @@ class Scripts_Tela(CTkFrame):
 
         #botão clear
         clear = CTkImage(Image.open("assets/trash.png"), size=(20, 20))
-        self.trashButton = CTkButton(self, width=30, image = clear, bg_color="transparent", fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.clear_log)
+        self.trashButton = CTkButton(self, width=35, image = clear, bg_color="transparent", fg_color="#DCDCDC", hover_color = "#DCDCDC", text = None, command=self.clear_log)
 
         #Botões tools Bar
         self.setCarrier = CTkButton(self.tools_bar, width=150, text="Set Carrier", command=lambda:self.set_carrier(self.getcheckedDevice()))
@@ -199,7 +210,7 @@ class Scripts_Tela(CTkFrame):
     
     def place(self, **kwargs): 
         self.tools_bar.place(y=0)
-        self.deviceStatus.place(y=100, x=580)
+        self.deviceStatus.place(y=100, x=550)
         self.setCarrier.place(y=10, x=10) 
         self.changeSKU.place(y=60, x=10)
         self.singleSim.place(y=10, x=180)
@@ -207,19 +218,23 @@ class Scripts_Tela(CTkFrame):
         self.changeRadio.place(y=10, x=350)
         self.setupJump.place(y=60, x=350)
         self.erase_button.place(y=10, x=520)
-        self.refreshButton.place(y=4, x=210)
+        self.refreshButton.place(y=4, x=240)
         self.fastboot_mode.place(y=60, x=520)
         self.logFrame.place(y=130, x=0)
         self.logFrame_scroll.place(y=0, x=0)
-        self.trashButton.place(y=100, x=530)
         self.summary_label.place(y=100)
-        self.deviceList.place(y=80)
+        self.trashButton.place(y=100, x=533)
+        self.deviceList.place(y=50)
         return super().place(**kwargs) 
     
     def clear_log(self):
         for log in self.logFrame_scroll.pack_slaves():
-            log.pack_forget()
-            log.destroy()
+            if log.complete == True:
+                log.pack_forget()
+                log.destroy()
+            else: 
+                return
+
 
     def place_forget(self): 
         '''Esquema de transição de telas'''
@@ -329,6 +344,7 @@ class Scripts_Tela(CTkFrame):
             log = self.start_Process("Set Carrier", device.barcode, ro_carrier)
             device.switch_working()
             if device.usbType == "FAST":
+                inicio = timeit.default_timer()
                 subprocess.call(fastboot_path + f'oem config fsg-id "" -s {device.barcode}')
                 subprocess.call(fastboot_path + f"erase modemst1 -s {device.barcode}")
                 subprocess.call(fastboot_path + f"erase modemst2 -s {device.barcode}")
@@ -342,6 +358,9 @@ class Scripts_Tela(CTkFrame):
             time.sleep(75)
             device.switch_working()
             log.complete_Process()
+            fim = timeit.default_timer()
+            te = inicio - fim
+            print(te)
             
         #threading set_carrier
         def set_carrier_threading(checkedDevices, ro_carrier):
@@ -359,6 +378,7 @@ class Scripts_Tela(CTkFrame):
         
     #Setup Jump
     def setup_jump(self, device):
+        inicio = timeit.default_timer()
         log = self.start_Process("Setup Jump", device.barcode)
         device.switch_working()
         if device.usbType == "ADB":
@@ -369,6 +389,9 @@ class Scripts_Tela(CTkFrame):
             print(f"The following device is not in ADB Mode: {device}")
         device.switch_working()
         log.complete_Process()
+        fim = timeit.default_timer()
+        te = inicio - fim
+        print(te)
 
     def setup_jump_threading(self, checkedDevices):
         for device in checkedDevices:
@@ -614,17 +637,18 @@ class Scripts_Tela(CTkFrame):
 resultados = ""
 
 class MultF_Tela(CTkFrame): 
-    def __init__(self, master, currentUser): 
-        super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
+    def __init__(self, master, currentUser, buildFolder): 
+        super().__init__(master, width=850, height=620, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.token = currentUser.token
+        self.buildFolder = buildFolder
         value = [["Product", "Status", "Build", "progress" ]]
 
-        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#228B22", bg_color="#228B22")
+        self.tools_bar = CTkFrame(self, width=850, height=100, fg_color="#1E90FF", bg_color="#1E90FF")
         self.deviceStatus = CTkFrame(self, width=300, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.deviceList = CTkScrollableFrame(self.deviceStatus, width=300, height=450, fg_color="#DCDCDC", bg_color="#DCDCDC")
         self.summary_label = CTkTable(self, row=1, column=4, width=135, values=value)
         self.logFrame = CTkFrame(self, width=580, height=500, fg_color="#DCDCDC", bg_color="#DCDCDC")
-        self.logFrame_scroll = CTkScrollableFrame(self.logFrame, width=545, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3")
+        self.logFrame_scroll = CTkScrollableFrame(self.logFrame, width=550, height=500, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.deviceList_buttons_mf = []
         self.log_Label = []
         self.commonProduct = ""
@@ -657,7 +681,7 @@ class MultF_Tela(CTkFrame):
                 self.url = f'{self.productId_url}{value}'
             self.androidVer_url = self.url
             self.updateBuildId(self.return_url_list())
-        self.androidVer_ = CTkComboBox(self.tools_bar, width=150,  button_color="#3CB371")
+        self.androidVer_ = CTkComboBox(self.tools_bar, width=150,  button_color="blue")
         self.androidVer_.set("Os Version")
         self.osVer_= CTkScrollableDropdown(self.androidVer_, values = ["Os Version"], justify="left", button_color="transparent",command=androidV_callback, autocomplete=True)
 
@@ -671,7 +695,7 @@ class MultF_Tela(CTkFrame):
             self.buildId_url = self.url
             print(self.url)
             self.updateProductName(self.return_url_list())
-        self.buildId = CTkComboBox(self.tools_bar, width=150, button_color="#3CB371")
+        self.buildId = CTkComboBox(self.tools_bar, width=150, button_color="blue")
         self.buildId_= CTkScrollableDropdown(self.buildId, width=300, values = ["Build ID"], justify="left", button_color="transparent", command=buildId_callback, autocomplete=True)
         self.buildId.set("Build ID")
 
@@ -685,7 +709,7 @@ class MultF_Tela(CTkFrame):
             self.productName_url = self.url
             print(self.url)
             self.updateuserType(self.return_url_list())
-        self.productName = CTkComboBox(self.tools_bar, width=150, button_color="#3CB371")
+        self.productName = CTkComboBox(self.tools_bar, width=150, button_color="blue")
         self.productName_= CTkScrollableDropdown(self.productName, values = ["Product Name"], justify="left", button_color="transparent", command=productName_callback, autocomplete=True)
         self.productName.set("Product Name")
         
@@ -700,7 +724,7 @@ class MultF_Tela(CTkFrame):
             self.userType_url = self.url
             print(self.url)
             self.updateCid(self.return_url_list())
-        self.userType = CTkComboBox(self.tools_bar, width=150, button_color="#3CB371")
+        self.userType = CTkComboBox(self.tools_bar, width=150, button_color="blue")
         self.userType_= CTkScrollableDropdown(self.userType, values = ["User Type"], justify="left", button_color="transparent", command= userType_callback, autocomplete=True)
         self.userType.set("User Type")
 
@@ -713,7 +737,7 @@ class MultF_Tela(CTkFrame):
                 self.url = f'{self.userType_url}{value}'
             self.cidType_url = self.url
             print(self.url)
-        self.cidType = CTkComboBox(self.tools_bar, width=150, button_color="#3CB371")
+        self.cidType = CTkComboBox(self.tools_bar, width=150, button_color="blue")
         self.cidType_= CTkScrollableDropdown(self.cidType, values = ["CID"], justify="left", button_color="transparent", command= cidType_callback, autocomplete=True)
         self.cidType.set("CID")
 
@@ -721,7 +745,7 @@ class MultF_Tela(CTkFrame):
 
     def fastboot_download(self, checkedDevices, token):
         buildId = self.buildId.get()
-        productlabel = self.product.get()
+        productlabel = self.product.cget("placeholder_text")
         log = self.start_Process("Build Download", buildId, productlabel)
 
         headers = {
@@ -730,9 +754,10 @@ class MultF_Tela(CTkFrame):
         site = requests.get(self.url, headers=headers)
         soup = BeautifulSoup(site.content, 'html.parser')
         self.element_list = soup.select_one("a[href*=fastboot]")
-        print(self.element_list)
+
         if self.element_list == None:
-            print("Fastboot build not found")
+            log.fast_notFound()
+            CTkMessagebox(title="Info", message="Fastboot not found")
             return
         for element in self.element_list:
             print(element.get_text())
@@ -745,51 +770,47 @@ class MultF_Tela(CTkFrame):
         self.nome = self.nome.replace(".tar.gz", "")
         self.nome = self.nome.replace("fastboot_", "")
 
-        if(os.path.exists(self.nome)) :
-            caminho_final = os.getcwd() + "\\" + self.nome
-            print("Arquivo já existe")
-        else :
-            print("build nao existe")
+        if not os.path.exists((f"{self.buildFolder}\\{self.nome}")):
             #BAIXA A BUILD SELECIONADA
             url2 = (self.url+self.element_list.get_text())
             opener = request.build_opener()
             opener.addheaders = [('Authorization', f'Basic {token}')]
             request.install_opener(opener)
 
-            request.urlretrieve(url2, file_gz)
+            request.urlretrieve(url2, f'{self.buildFolder}\\{file_gz}')
 
-            diretorio_arquivo = os.getcwd()
+            caminho_arquivo = (f'{self.buildFolder}\\{file_gz}')
 
-            caminho_arquivo = (f'{diretorio_arquivo}\\{file_gz}')
-            log.process_extract()
             # Extraindo o conteúdo do arquivo .tar.gz
-            with tarfile.open(caminho_arquivo, 'r:gz') as tar:
-                tar.extractall(diretorio_arquivo)
-                request.urlretrieve(url2, file_gz)
-
-                diretorio_arquivo = os.getcwd()
-
-                caminho_arquivo = (f'{diretorio_arquivo}\\{file_gz}')
-
-                # Entrando na pasta extraída
-                pasta_extraida = os.path.splitext(caminho_arquivo)[0]  
-                # Remove a extensão .tar.gz
-                os.chdir(pasta_extraida.replace(".tar", "").replace("fastboot_", ""))
-        
-                # Armazenando o caminho na variável
-                caminho_final = os.getcwd()
-                os.remove(caminho_arquivo)
-                caminho_arquivo = 0
-                log.process_complete()
-        for device in checkedDevices :
-            self.flash_mode(caminho_final, self.roCarrier, device)
-            log.flash_device()
-            log.process_complete()
+            log.process_extract()
+            build_file = tarfile.open(f"{self.buildFolder}\\{file_gz}")
+            build_file.extractall(self.buildFolder)
+    
+            
+            build_file.close()
+            if os.path.exists(f"{self.buildFolder}\\{file_gz}"):
+                print("cheguei aqui")
+                for file in self.buildFolder:
+                    print("removendo o arquivo")
+                    if file.find(file_gz):
+                        os.unlink(caminho_arquivo)
+            caminho_arquivo = ""
+            build_root = (f"{self.buildFolder}\\{self.nome}")
+            
+            for device in checkedDevices:
+                    log.flash_device()
+                    self.flash_mode(build_root, self.roCarrier)
+                    log.process_complete()       
+        else :
+            CTkMessagebox(master=self, title="Info", message="The specified build has been already downloaded!")
+            for device in checkedDevices:
+                    log.flash_device()
+                    self.flash_mode(build_root, self.roCarrier)
+                    log.process_complete()
 
     def flash_mode(self, caminho_pasta, carrier, fastDevice):
-        # print(f"BAIXANDO BUILD DO {fastDevice[1]}")
             try:
-                # Mude para a pasta desejada                                       '
+                # Mude para a pasta desejada
                 os.chdir(caminho_pasta)
                 subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
                 subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
@@ -807,9 +828,8 @@ class MultF_Tela(CTkFrame):
                 print(f"Ocorreu um erro: {e}")
         
     def thread_fast(self):
-        thread = threading.Thread(target=lambda:self.fastboot_download(self.getcheckedDevice(), self.token))
-        thread.start()
-    
+            threading.Thread(target=lambda: self.fastboot_download(self.getcheckedDevice(), self.token)).start()
+
     def getcheckedDevice(self):
         checkedDevices = []
         for device in self.deviceList_buttons_mf:
@@ -817,7 +837,7 @@ class MultF_Tela(CTkFrame):
                 deviceInfo = []
                 deviceInfo.append(device.usbType)
                 deviceInfo.append(device.barcode)
-                deviceInfo.append(device.product)
+                deviceInfo.append(device.productid)
                 deviceInfo.append(device.isWorking)
                 
                 checkedDevices.append(deviceInfo)                
@@ -831,18 +851,20 @@ class MultF_Tela(CTkFrame):
         site = requests.get(self.url, headers=headers)
         soup = BeautifulSoup(site.content, 'html.parser')
         element_list = soup.find_all('a')
+        for element in element_list:
+            if element.get_text() == "../":
+                element_list.remove(element)
         resultados = [element.get_text() for element in element_list]
         print(resultados)
         return resultados
     
     def upLabel_button(self, product):
         self.product_ = product
-        print(product)
         self.updateProductLabel(self.product_)
         if self.url.find(self.product_) == -1:
-
             self.url = f'https://artifacts.mot.com/artifactory/{self.product_}/' 
-        print(self.url)
+        else:
+            return
         self.productId_url = self.url
         self.updateAndroidVer(self.return_url_list())
         
@@ -854,6 +876,11 @@ class MultF_Tela(CTkFrame):
         self.updateProductName([])
         self.updateuserType([])
         self.updateCid([])
+        self.androidVer_.set("OS Version")
+        self.buildId.set("Build ID")
+        self.productName.set("Product Name")
+        self.userType.set("UserType")
+        self.cidType.set("CID")
 
     def updateAndroidVer(self, resultados):
         self.osVer_.configure(values=resultados)
@@ -861,21 +888,31 @@ class MultF_Tela(CTkFrame):
         self.updateProductName([])
         self.updateuserType([])
         self.updateCid([])
+        self.buildId.set("Build ID")
+        self.productName.set("Product Name")
+        self.userType.set("UserType")
+        self.cidType.set("CID")
 
     def updateBuildId(self, resultados):
         self.buildId_.configure(values=resultados)
         self.updateProductName([])
         self.updateuserType([])
         self.updateCid([])
+        self.productName.set("Product Name")
+        self.userType.set("UserType")
+        self.cidType.set("CID")
 
     def updateProductName(self, resultados):
         self.productName_.configure(values=resultados)
         self.updateuserType([])
         self.updateCid([])
+        self.userType.set("UserType")
+        self.cidType.set("CID")
 
     def updateuserType(self, resultados):
         self.userType_.configure(values=resultados)
         self.updateCid([])
+        self.cidType.set("CID")
     
     def updateCid(self, resultados):
         self.cidType_.configure(values=resultados)
@@ -885,7 +922,6 @@ class MultF_Tela(CTkFrame):
         headers = {
         'Authorization': f'Basic {self.token}'
         }
-
         site = requests.get(url, headers=headers)
         soup = BeautifulSoup(site.content, 'html.parser')
         element_list = soup.find_all('a')
@@ -903,8 +939,12 @@ class MultF_Tela(CTkFrame):
     #widgets 
     def clear_log(self):
         for log in self.logFrame_scroll.pack_slaves():
-            log.pack_forget()
-            log.destroy()
+            if log.complete == True:
+                log.pack_forget()
+                log.destroy()
+            else: 
+                return
+
 
     def place(self, **kwargs):
         self.tools_bar.place(y=0)
@@ -936,6 +976,7 @@ class MultF_Tela(CTkFrame):
         while len(self.deviceList_buttons_mf) > 0:
             self.deviceList_buttons_mf[0].destroy()
             self.deviceList_buttons_mf.pop(0)
+
         self.updateProductLabel("")
         self.checkedDevices = 0
 
@@ -1112,6 +1153,7 @@ class DeviceButton(CTkButton):
                     self.isChecked = False
         else:
             print(f"Device is busy: {self.barcode}")
+            self.configure(fg_color="yellow")
     
     def switch_working(self):
         if not self.isWorking:
