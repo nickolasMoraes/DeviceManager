@@ -2,7 +2,6 @@ import base64
 import os
 import pickle
 
-
 class User :
 
     class UserModel :
@@ -13,20 +12,19 @@ class User :
             self.token = convertToken
 
 
-    def storeUser(user: UserModel) -> None:
-        with open('credentials.pickle', 'wb') as f:
+    def storeUser(user: UserModel, credentialFolder) -> None:
+        if not os.path.exists(f'{credentialFolder}'):
+            os.mkdir(f'{credentialFolder}')
+        with open(f'{credentialFolder}\\credentials.pickle', 'wb') as f:
             pickle.dump(user, f)
             print("usuário armazenado")
 
-    def getUser() -> UserModel :
-        if(os.path.exists("credentials.pickle")) :
-            with open('credentials.pickle', 'rb') as f:
+    def getUser(credentialFolder) -> UserModel :
+        if(os.path.exists(f'{credentialFolder}\\credentials.pickle')) :
+            with open(f'{credentialFolder}\\credentials.pickle', 'rb') as f:
                 currentUser = pickle.load(f)
                 print("usuário requisitado")
         else :
-            currentUser = User.UserModel("","")
-        
-
-        
+            currentUser = User.UserModel("","")       
         return currentUser
 

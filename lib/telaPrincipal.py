@@ -1,4 +1,4 @@
-from CTkScrollableDropdown import *
+from lib.CTkScrollableDropdown import *
 from customtkinter import * 
 from tkinter import *
 import os
@@ -10,13 +10,14 @@ import sys
 import tarfile
 import threading
 from urllib import request
-from constants import *
+from lib.constants import *
 from PIL import Image
 import time
 from CTkTable import *
 from CTkMessagebox import *
 import time
 import timeit
+
 
 
 class ProcessLog(CTkFrame):
@@ -34,63 +35,63 @@ class ProcessLog(CTkFrame):
         if self.ro_carrier != None:
             self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
             self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-            self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+            self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
             self.ro_carrier_label = CTkLabel(self, width=137, height=30, text=ro_carrier)
 
         elif self.option != None:
             if self.option == 1:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="Single SIM")
 
             elif self.option == 2:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="Dual SIM")
 
             elif self.option == 3:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="p-SIM")
 
             elif self.option == 4:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.option_label = CTkLabel(self, width=137, height=30, text="e-SIM")
 
             elif self.sku != None:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.sku_label = CTkLabel(self, width=137, height=30, text=self.sku)
 
         elif radio != None:
                 self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=RIGHT)
                 self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-                self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+                self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
                 self.radio_label = CTkLabel(self, width=137, height=30, text=self.radio)
 
         else:
             self.barcode_Label = CTkLabel(self, width=137, height=30, text=self.barcode, justify=CENTER)
             self.title_Label = CTkLabel(self, width=137, height=30, text=self.title)
-            self.process_Label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
+            self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
             self.empty_label = CTkLabel(self, width=137, height=30, text="-")
 
 
     def complete_Process(self):
-        self.process_Label.configure(text="Complete:", text_color="green")
+        self.process_label.configure(text="Complete:", text_color="green")
         self.complete = True
     
     def pack(self, **kwargs):
         if self.ro_carrier != None:
             self.barcode_Label.pack(side=LEFT)
             self.barcode_Label.pack_propagate(False)
-            self.process_Label.pack(side=LEFT)
-            self.process_Label.pack_propagate(False)
+            self.process_label.pack(side=LEFT)
+            self.process_label.pack_propagate(False)
             self.title_Label.pack(side=LEFT)
             self.title_Label.pack_propagate(False)
             self.ro_carrier_label.pack(side=LEFT)
@@ -98,8 +99,8 @@ class ProcessLog(CTkFrame):
         elif self.option != None:
             self.barcode_Label.pack(side=LEFT)
             self.barcode_Label.pack_propagate(False)
-            self.process_Label.pack(side=LEFT)
-            self.process_Label.pack_propagate(False)
+            self.process_label.pack(side=LEFT)
+            self.process_label.pack_propagate(False)
             self.title_Label.pack(side=LEFT)
             self.title_Label.pack_propagate(False)
             self.option_label.pack(side=LEFT)
@@ -107,8 +108,8 @@ class ProcessLog(CTkFrame):
         elif self.sku != None:
             self.barcode_Label.pack(side=LEFT)
             self.barcode_Label.pack_propagate(False)
-            self.process_Label.pack(side=LEFT)
-            self.process_Label.pack_propagate(False)
+            self.process_label.pack(side=LEFT)
+            self.process_label.pack_propagate(False)
             self.title_Label.pack(side=LEFT)
             self.title_Label.pack_propagate(False)
             self.sku_label.pack(side=LEFT)
@@ -116,8 +117,8 @@ class ProcessLog(CTkFrame):
         elif self.radio != None:
             self.barcode_Label.pack(side=LEFT)
             self.barcode_Label.pack_propagate(False)
-            self.process_Label.pack(side=LEFT)
-            self.process_Label.pack_propagate(False)
+            self.process_label.pack(side=LEFT)
+            self.process_label.pack_propagate(False)
             self.title_Label.pack(side=LEFT)
             self.title_Label.pack_propagate(False)
             self.radio_label.pack(side=LEFT)
@@ -125,8 +126,8 @@ class ProcessLog(CTkFrame):
         else:
             self.barcode_Label.pack(side=LEFT)
             self.barcode_Label.pack_propagate(False)
-            self.process_Label.pack(side=LEFT)
-            self.process_Label.pack_propagate(False)
+            self.process_label.pack(side=LEFT)
+            self.process_label.pack_propagate(False)
             self.title_Label.pack(side=LEFT)
             self.title_Label.pack_propagate(False)
             self.empty_label.pack(side=LEFT)
@@ -145,23 +146,26 @@ class ProcessLog_M(CTkFrame):
         self.product_label = CTkLabel(self, width=137, height=30, text=self.product, justify=RIGHT)
         self.process_label = CTkLabel(self, width=137, height=30, text="Downloading:", text_color="red")
         self.buildId_label = CTkLabel(self, width=137, height=30, text=self.buildId)
-        self.empty_label = CTkLabel(self, width=137, height=30, text="-")
+        self.progressBar = CTkProgressBar(self, width=137, height=30)
         
+    def fast_notFound(self):
+        self.process_label.configure(text="Fastboot Not Found", text_color="orange")
+        self.progressBar.configure(self, width=137, height=30 )
+        self.complete = True
+
     def flash_device(self):
         self.process_label.configure(text="Flashing:", text_color="purple")
-    
+        self.progressBar.configure()
+        self.complete = False
+
     def process_extract(self):
         self.process_label.configure(text="Extract:", text_color="blue")
+        self.complete = False
 
     def process_complete(self):
         self.process_label.configure(text="Complete:", text_color="green")
-        self.complete = True
+        self.complete = True     
 
-    def fast_notFound(self):
-        self.process_label.configure(text="Fastboot Not Found", text_color="orange")
-        self.complete = True
-
-        
     def pack(self, **kwargs):
         self.product_label.pack(side=LEFT)
         self.product_label.pack_propagate()
@@ -169,14 +173,15 @@ class ProcessLog_M(CTkFrame):
         self.process_label.pack_propagate()
         self.buildId_label.pack(side=LEFT)
         self.buildId_label.pack_propagate()
-        self.empty_label.pack(side=LEFT)
-        self.empty_label.pack_propagate()
+        self.progressBar.pack(side=LEFT)
+        self.progressBar.pack_propagate()
         return super().pack(**kwargs)
     
 class Scripts_Tela(CTkFrame):
-    def __init__(self, master, user, password, ): 
+    def __init__(self, master, user, password, assetsFolder): 
         super().__init__(master, width=850, height=600, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.user = user
+        self.assetsFolder = assetsFolder
         self.password = password
         value = [["Barcode", "Status", "Process", "input" ]]
         #widgets 
@@ -190,11 +195,11 @@ class Scripts_Tela(CTkFrame):
         self.log_Label = []
     
         #Botão refresh
-        refresh = CTkImage(Image.open("assets/refresh.png"), size=(45, 45))
+        refresh = CTkImage(Image.open(f"{self.assetsFolder}\\refresh.png"), size=(45, 45))
         self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.refresh_device)
 
         #botão clear
-        clear = CTkImage(Image.open("assets/trash.png"), size=(20, 20))
+        clear = CTkImage(Image.open(f"{self.assetsFolder}\\trash.png"), size=(20, 20))
         self.trashButton = CTkButton(self, width=35, image = clear, bg_color="transparent", fg_color="#DCDCDC", hover_color = "#DCDCDC", text = None, command=self.clear_log)
 
         #Botões tools Bar
@@ -229,7 +234,7 @@ class Scripts_Tela(CTkFrame):
     
     def clear_log(self):
         for log in self.logFrame_scroll.pack_slaves():
-            if log.complete == True:
+            if log.process_label.cget('text').find('Complete') != -1:
                 log.pack_forget()
                 log.destroy()
             else: 
@@ -317,10 +322,10 @@ class Scripts_Tela(CTkFrame):
                 fastList.append(fastDevice)
 
         for device in adbList:
-            self.deviceList_buttons.append(DeviceButton(self.deviceList, device, self))
+            self.deviceList_buttons.append(DeviceButton(self.deviceList, device, self, self.assetsFolder))
 
         for device in fastList:
-            self.deviceList_buttons.append(DeviceButton(self.deviceList, device, self))
+            self.deviceList_buttons.append(DeviceButton(self.deviceList, device, self, self.assetsFolder))
 
         for device in self.deviceList_buttons:
             device.pack()
@@ -637,9 +642,10 @@ class Scripts_Tela(CTkFrame):
 resultados = ""
 
 class MultF_Tela(CTkFrame): 
-    def __init__(self, master, currentUser, buildFolder): 
+    def __init__(self, master, currentUser, buildFolder, assetsFolder): 
         super().__init__(master, width=850, height=620, fg_color="#D3D3D3", bg_color="#D3D3D3")
         self.token = currentUser.token
+        self.assetsFolder = assetsFolder
         self.buildFolder = buildFolder
         value = [["Product", "Status", "Build", "progress" ]]
 
@@ -656,18 +662,18 @@ class MultF_Tela(CTkFrame):
         self.url = "https://artifacts.mot.com/artifactory/"
         self.productId_url = ""
 
-        clear = CTkImage(Image.open("assets/trash.png"), size=(20, 20))
-        self.trashButton = CTkButton(self, width=35, image = clear, bg_color="transparent", fg_color="#DCDCDC", hover_color = "#DCDCDC", text = None, command=self.clear_log)
+        clear = CTkImage(Image.open(f"{self.assetsFolder}\\trash.png"), size=(20, 20))
+        self.trashButton = CTkButton(self, width=35, image = clear, bg_color="transparent", fg_color="#DCDCDC", hover_color = "#DCDCDC", text = None, command=lambda: threading.Thread(target=self.clear_log).start())
 
         #Botão refresh
-        refresh = CTkImage(Image.open("assets/refresh.png"), size=(45, 45))
+        refresh = CTkImage(Image.open(f"{self.assetsFolder}\\refresh.png"), size=(45, 45))
         self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.refresh_device)
 
         #labels
         self.product =  CTkEntry(self.tools_bar, width=150, fg_color="white", corner_radius=5)
-        fastbootName = CTkImage(Image.open("assets/send.png"), size=(30, 30))
-        uplabelimg = CTkImage(Image.open("assets/Update_Label.png"), size=(20, 20))
-        self.upLabel = CTkButton(self.product, width=10, height=0, text=None, image=uplabelimg, fg_color=None, hover = None, border_color="gray",corner_radius=4 ,command=lambda:self.upLabel_button(self.product.get()))
+        fastbootName = CTkImage(Image.open(f"{self.assetsFolder}\\send.png"), size=(30, 30))
+        uplabelimg = CTkImage(Image.open(f"{self.assetsFolder}\\Update_Label.png"), size=(20, 20))
+        self.upLabel = CTkButton(self.product, width=10, height=0, text=None, image=uplabelimg, fg_color=None, hover = None, border_color="gray",corner_radius=4 ,command=lambda: threading.Thread(self.upLabel_button(self.product.get())).start())
 
         self.fastbootName =  CTkButton(self.tools_bar, width=30, text=None,image=fastbootName , fg_color= "transparent", hover_color = "#191970", command=self.thread_fast)
         
@@ -756,8 +762,8 @@ class MultF_Tela(CTkFrame):
         self.element_list = soup.select_one("a[href*=fastboot]")
 
         if self.element_list == None:
-            log.fast_notFound()
             CTkMessagebox(title="Info", message="Fastboot not found")
+            log.fast_notFound()
             return
         for element in self.element_list:
             print(element.get_text())
@@ -769,6 +775,7 @@ class MultF_Tela(CTkFrame):
         self.nome = self.element_list.get_text()
         self.nome = self.nome.replace(".tar.gz", "")
         self.nome = self.nome.replace("fastboot_", "")
+        print(f"{self.buildFolder}\\{self.nome}")
 
         if not os.path.exists((f"{self.buildFolder}\\{self.nome}")):
             #BAIXA A BUILD SELECIONADA
@@ -785,7 +792,6 @@ class MultF_Tela(CTkFrame):
             log.process_extract()
             build_file = tarfile.open(f"{self.buildFolder}\\{file_gz}")
             build_file.extractall(self.buildFolder)
-    
             
             build_file.close()
             if os.path.exists(f"{self.buildFolder}\\{file_gz}"):
@@ -795,37 +801,53 @@ class MultF_Tela(CTkFrame):
                     if file.find(file_gz):
                         os.unlink(caminho_arquivo)
             caminho_arquivo = ""
-            build_root = (f"{self.buildFolder}\\{self.nome}")
+            self.build_root = (f"{self.buildFolder}\\{self.nome}")
             
             for device in checkedDevices:
-                    log.flash_device()
-                    self.flash_mode(build_root, self.roCarrier)
-                    log.process_complete()       
-        else :
+                log.flash_device()
+                self.flash_mode(self.build_root, self.roCarrier, device, log)
+                log.process_complete()
+                           
+        else:
+            self.build_root = (f"{self.buildFolder}//{self.nome}")
             CTkMessagebox(master=self, title="Info", message="The specified build has been already downloaded!")
             for device in checkedDevices:
-                    log.flash_device()
-                    self.flash_mode(build_root, self.roCarrier)
-                    log.process_complete()
+                self.flash_mode(self.build_root, self.roCarrier, device, log)
+                log.flash_device()
+                
+    def flash_mode(self, caminho_pasta, carrier, fastDevice, log):
+        try:
+            # Mude para a pasta desejada
+            os.chdir(caminho_pasta)
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase userdata")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst1")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst2")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem fb_mode_clear")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config bootmode """)
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase frp")
+            subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config carrier {carrier}")
 
-    def flash_mode(self, caminho_pasta, carrier, fastDevice):
-            try:
-                # Mude para a pasta desejada
-                os.chdir(caminho_pasta)
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} -w")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase cache")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase userdata")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst1")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase modemst2")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem fb_mode_clear")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config bootmode """)
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} erase frp")
-                subprocess.getoutput(fastboot_path + f" -s {fastDevice[1]} oem config carrier {carrier}")
+            os.system(f'flashall.bat /d {fastDevice[1]}')
+            # parts_to_flash = 0
+            # with open ("flashall.bat", "r") as file:
+            #     for line in file.readlines():
+            #         if line.find("ECHO. Flashing") != -1:
+            #             parts_to_flash +=1
+            # stepValue = 100/parts_to_flash
+            # log.progressBar.configure(determinate_speed=round(stepValue))
 
-                os.system(f'flashall.bat /d {fastDevice[1]}')
-
-            except Exception as e:
-                print(f"Ocorreu um erro: {e}")
+            # p = subprocess.Popen(f"flashall.bat -s {fastDevice[1]}", stdout=subprocess.PIPE)
+            # for line in iter(p.stdout.readline, b''):
+            #     if str(line).find("Finished") != -1:
+            #         log.progressBar.step()
+            #         print(str(line))
+            # p.stdout.close()
+            # p.wait()
+            log.process_complete()
+        except Exception as e:
+            print(f"Ocorreu um erro: {e}")
         
     def thread_fast(self):
             threading.Thread(target=lambda: self.fastboot_download(self.getcheckedDevice(), self.token)).start()
@@ -864,7 +886,7 @@ class MultF_Tela(CTkFrame):
         if self.url.find(self.product_) == -1:
             self.url = f'https://artifacts.mot.com/artifactory/{self.product_}/' 
         else:
-            return
+            self.url = f'https://artifacts.mot.com/artifactory/{self.product_}/'
         self.productId_url = self.url
         self.updateAndroidVer(self.return_url_list())
         
@@ -939,11 +961,11 @@ class MultF_Tela(CTkFrame):
     #widgets 
     def clear_log(self):
         for log in self.logFrame_scroll.pack_slaves():
-            if log.complete == True:
+            if log.process_label.cget('text').find('Complete') != -1 or log.process_label.cget('text').find('Fastboot') != -1:
                 log.pack_forget()
                 log.destroy()
             else: 
-                return
+                continue
 
 
     def place(self, **kwargs):
@@ -1048,10 +1070,10 @@ class MultF_Tela(CTkFrame):
                 fastList.append(fastDevice)
 
         for device in adbList:
-            self.deviceList_buttons_mf.append(DeviceButton(self.deviceList, device, self))
+            self.deviceList_buttons_mf.append(DeviceButton(self.deviceList, device, self, self.assetsFolder))
 
         for device in fastList:
-            self.deviceList_buttons_mf.append(DeviceButton(self.deviceList, device, self))
+            self.deviceList_buttons_mf.append(DeviceButton(self.deviceList, device, self, self.assetsFolder))
 
         for device in self.deviceList_buttons_mf:
             device.pack()
@@ -1064,9 +1086,10 @@ class MultF_Tela(CTkFrame):
         return log
 
 class DeviceButton(CTkButton): 
-    def __init__(self, master, deviceInfo, tela: MultF_Tela):
+    def __init__(self, master, deviceInfo, tela: MultF_Tela, assetsFolder):
         super() .__init__(master, width=250, height=100, fg_color="#191970", command=self.click_device)
         self.isChecked = False
+        self.assetsFolder = assetsFolder
         self.tela = tela
         
         self.usbType = deviceInfo[0]
@@ -1112,7 +1135,7 @@ class DeviceButton(CTkButton):
             self.radio = radio_[7:radio_.find("\n")]
 
 ##########################################################################################################################################
-        device_refresh = CTkImage(Image.open("assets/device_refresh.png"), size = (50, 100))    
+        device_refresh = CTkImage(Image.open(f"{self.assetsFolder}\\device_refresh.png"), size = (50, 100))    
         self.configure(image = device_refresh, text=f"Barcode: {self.barcode.strip()}\nSecure: {self.secure}\nSKU: {self.sku}\nHardware rev: {self.hw_rev}\nCarrier: {self.carrier}\nProduct: {self.productid}")
         self._text_label.configure(justify=LEFT, anchor='e', pady=5, padx=10)
 
