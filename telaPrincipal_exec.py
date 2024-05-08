@@ -3,6 +3,7 @@ from tkinter import *
 from lib.telaPrincipal import*
 from CTkMenuBar import *
 from lib.models.user_model import *
+import sys
 
 base = CTk() 
 base.geometry("1000x600") 
@@ -27,9 +28,9 @@ else:
         os.mkdir(f"{os.environ['USERPROFILE']}\\Documents\\Builds")
     buildFolder = f"{os.environ['USERPROFILE']}\\Documents\\Builds"
 
-currentUser = User.getUser(f'{root_path}\\docs')
+currentUser = User.UserModel(sys.argv[1], sys.argv[2])
 
-multF_tela = MultF_Tela(base, currentUser, buildFolder, assetsFolder) 
+multF_tela = MultF_Tela(base, currentUser, buildFolder, assetsFolder)
 scripts_tela = Scripts_Tela(base, currentUser.username, currentUser.password, assetsFolder) 
 
 

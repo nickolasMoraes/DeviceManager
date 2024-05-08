@@ -20,11 +20,12 @@ class User :
             print("usuário armazenado")
 
     def getUser(credentialFolder) -> UserModel :
-        if(os.path.exists(f'{credentialFolder}\\credentials.pickle')) :
+        if os.path.exists(f'{credentialFolder}\\credentials.pickle'):
             with open(f'{credentialFolder}\\credentials.pickle', 'rb') as f:
                 currentUser = pickle.load(f)
                 print("usuário requisitado")
         else :
-            currentUser = User.UserModel("","")       
+            currentUser = User.UserModel("","")   
+        print(f'{currentUser.username} {currentUser.password} {currentUser.token}')
         return currentUser
 

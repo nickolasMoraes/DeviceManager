@@ -15,5 +15,8 @@ del "%~dp0\*.spec"
 :: Create a Tools Folder
 mkdir "%~dp0\dist\tools"
 
+:: Create a docs folder
+mkdir "%~dp0\dist\docs"
+
 :: Moving functions file to tools folder
 move "%~dp0\dist\functions.exe" "%~dp0\dist\tools"

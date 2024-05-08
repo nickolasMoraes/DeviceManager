@@ -19,7 +19,7 @@ import time
 import timeit
 
 
-
+#Class of logs from scripts tela
 class ProcessLog(CTkFrame):
     def __init__(self, master, title, barcode, ro_carrier=None, option=None, SKU=None, radio=None):
         super().__init__(master, width=550, height=50, fg_color="#F5F5F5", bg_color="#F5F5F5")
@@ -81,7 +81,6 @@ class ProcessLog(CTkFrame):
             self.process_label = CTkLabel(self, width=137, height=30, text="Running:", text_color="red")
             self.empty_label = CTkLabel(self, width=137, height=30, text="-")
 
-
     def complete_Process(self):
         self.process_label.configure(text="Complete:", text_color="green")
         self.complete = True
@@ -134,7 +133,7 @@ class ProcessLog(CTkFrame):
             self.empty_label.pack_propagate(False)
         print("processo criado")
         return super().pack(**kwargs) 
-
+#Class of logs from Multf tela
 class ProcessLog_M(CTkFrame):
     def __init__(self, master, title, element_list, buildId):
         super().__init__(master, width=550, height=50, fg_color="#F5F5F5", bg_color="#F5F5F5")
@@ -146,16 +145,17 @@ class ProcessLog_M(CTkFrame):
         self.product_label = CTkLabel(self, width=137, height=30, text=self.product, justify=RIGHT)
         self.process_label = CTkLabel(self, width=137, height=30, text="Downloading:", text_color="red")
         self.buildId_label = CTkLabel(self, width=137, height=30, text=self.buildId)
-        self.progressBar = CTkProgressBar(self, width=137, height=30)
+        self.empty_label = CTkLabel(self, width=137, height=30, text="-")
+        # self.progressBar = CTkProgressBar(self, width=137, height=30)
         
     def fast_notFound(self):
         self.process_label.configure(text="Fastboot Not Found", text_color="orange")
-        self.progressBar.configure(self, width=137, height=30 )
+        # self.progressBar.configure(self, width=137, height=30 )
         self.complete = True
 
     def flash_device(self):
         self.process_label.configure(text="Flashing:", text_color="purple")
-        self.progressBar.configure()
+        # self.progressBar.configure()
         self.complete = False
 
     def process_extract(self):
@@ -173,8 +173,10 @@ class ProcessLog_M(CTkFrame):
         self.process_label.pack_propagate()
         self.buildId_label.pack(side=LEFT)
         self.buildId_label.pack_propagate()
-        self.progressBar.pack(side=LEFT)
-        self.progressBar.pack_propagate()
+        # self.progressBar.pack(side=LEFT)
+        # self.progressBar.pack_propagate()
+        self.empty_label.pack(side=LEFT)
+        self.empty_label.pack_propagate()
         return super().pack(**kwargs)
     
 class Scripts_Tela(CTkFrame):
@@ -240,7 +242,6 @@ class Scripts_Tela(CTkFrame):
             else: 
                 return
 
-
     def place_forget(self): 
         '''Esquema de transição de telas'''
         for widget in self.place_slaves(): 
@@ -252,7 +253,6 @@ class Scripts_Tela(CTkFrame):
         while len(self.deviceList_buttons) > 0:
             self.deviceList_buttons[0].destroy()
             self.deviceList_buttons.pop(0)
-
 
         output = subprocess.getoutput(adb_path + "devices") # Barcode do Device em ADB
         serialADB = output.split("\n")
@@ -667,15 +667,15 @@ class MultF_Tela(CTkFrame):
 
         #Botão refresh
         refresh = CTkImage(Image.open(f"{self.assetsFolder}\\refresh.png"), size=(45, 45))
-        self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=self.refresh_device)
+        self.refreshButton = CTkButton(self.deviceStatus, width=30, image = refresh, fg_color= "transparent", hover_color = "#DCDCDC", text = None, command=lambda: threading.Thread(target=self.refresh_device).start())
 
         #labels
         self.product =  CTkEntry(self.tools_bar, width=150, fg_color="white", corner_radius=5)
         fastbootName = CTkImage(Image.open(f"{self.assetsFolder}\\send.png"), size=(30, 30))
         uplabelimg = CTkImage(Image.open(f"{self.assetsFolder}\\Update_Label.png"), size=(20, 20))
-        self.upLabel = CTkButton(self.product, width=10, height=0, text=None, image=uplabelimg, fg_color=None, hover = None, border_color="gray",corner_radius=4 ,command=lambda: threading.Thread(self.upLabel_button(self.product.get())).start())
+        self.upLabel = CTkButton(self.product, width=10, height=0, text=None, image=uplabelimg, fg_color=None, hover = None, border_color="gray",corner_radius=4 ,command=lambda: threading.Thread(target=self.upLabel_button(self.product.get())).start())
 
-        self.fastbootName =  CTkButton(self.tools_bar, width=30, text=None,image=fastbootName , fg_color= "transparent", hover_color = "#191970", command=self.thread_fast)
+        self.fastbootName =  CTkButton(self.tools_bar, width=30, text=None,image=fastbootName , fg_color= "transparent", hover_color = "#191970", command=lambda: threading.Thread(target=self.thread_fast).start())
         
         #Combobox
         self.androidVer_url = ""
@@ -689,7 +689,7 @@ class MultF_Tela(CTkFrame):
             self.updateBuildId(self.return_url_list())
         self.androidVer_ = CTkComboBox(self.tools_bar, width=150,  button_color="blue")
         self.androidVer_.set("Os Version")
-        self.osVer_= CTkScrollableDropdown(self.androidVer_, values = ["Os Version"], justify="left", button_color="transparent",command=androidV_callback, autocomplete=True)
+        self.osVer_= CTkScrollableDropdown(self.androidVer_, values = ["Os Version"], justify="left", button_color="transparent",command= androidV_callback, autocomplete=True, height=150)
 
         self.buildId_url = ""
         def buildId_callback(value):
@@ -702,7 +702,7 @@ class MultF_Tela(CTkFrame):
             print(self.url)
             self.updateProductName(self.return_url_list())
         self.buildId = CTkComboBox(self.tools_bar, width=150, button_color="blue")
-        self.buildId_= CTkScrollableDropdown(self.buildId, width=300, values = ["Build ID"], justify="left", button_color="transparent", command=buildId_callback, autocomplete=True)
+        self.buildId_= CTkScrollableDropdown(self.buildId, width=300, values = ["Build ID"], justify="left", button_color="transparent", command= buildId_callback, autocomplete=True)
         self.buildId.set("Build ID")
 
         self.productName_url = ""
@@ -716,7 +716,7 @@ class MultF_Tela(CTkFrame):
             print(self.url)
             self.updateuserType(self.return_url_list())
         self.productName = CTkComboBox(self.tools_bar, width=150, button_color="blue")
-        self.productName_= CTkScrollableDropdown(self.productName, values = ["Product Name"], justify="left", button_color="transparent", command=productName_callback, autocomplete=True)
+        self.productName_= CTkScrollableDropdown(self.productName, values = ["Product Name"], justify="left", button_color="transparent", command=productName_callback, autocomplete=True, height=250, width=250)
         self.productName.set("Product Name")
         
 
@@ -731,7 +731,7 @@ class MultF_Tela(CTkFrame):
             print(self.url)
             self.updateCid(self.return_url_list())
         self.userType = CTkComboBox(self.tools_bar, width=150, button_color="blue")
-        self.userType_= CTkScrollableDropdown(self.userType, values = ["User Type"], justify="left", button_color="transparent", command= userType_callback, autocomplete=True)
+        self.userType_= CTkScrollableDropdown(self.userType, values = ["User Type"], justify="left", button_color="transparent", command= userType_callback, autocomplete=True, height=150)
         self.userType.set("User Type")
 
         self.cidType_url = ""
@@ -744,7 +744,7 @@ class MultF_Tela(CTkFrame):
             self.cidType_url = self.url
             print(self.url)
         self.cidType = CTkComboBox(self.tools_bar, width=150, button_color="blue")
-        self.cidType_= CTkScrollableDropdown(self.cidType, values = ["CID"], justify="left", button_color="transparent", command= cidType_callback, autocomplete=True)
+        self.cidType_= CTkScrollableDropdown(self.cidType, values = ["CID"], justify="left", button_color="transparent", command= cidType_callback, autocomplete=True, height=150, width=200)
         self.cidType.set("CID")
 
         self.roCarrier = CTkEntry(self.tools_bar, width=150, placeholder_text="ro.carrier")
@@ -884,15 +884,17 @@ class MultF_Tela(CTkFrame):
         self.product_ = product
         self.updateProductLabel(self.product_)
         if self.url.find(self.product_) == -1:
-            self.url = f'https://artifacts.mot.com/artifactory/{self.product_}/' 
+            self.url = f'https://artifacts.mot.com/artifactory/{product}/'
+            self.product.configure(placeholder_text=product)
         else:
-            self.url = f'https://artifacts.mot.com/artifactory/{self.product_}/'
+            self.url = f'https://artifacts.mot.com/artifactory/{product}/'
         self.productId_url = self.url
         self.updateAndroidVer(self.return_url_list())
+        self.product.configure(placeholder_text=product)
         
     def updateProductLabel(self, product):
         self.commonProduct=product
-        self.product.configure(textvariable=product, placeholder_text=product)
+        self.product.configure(placeholder_text=product)
         self.updateAndroidVer([])
         self.updateBuildId([])
         self.updateProductName([])
